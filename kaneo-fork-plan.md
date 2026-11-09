@@ -1,5 +1,7 @@
 # Kaneo fork: parent display + Done/validation guard
 
+Task checklist: [kaneo-fork-tasks.md](./kaneo-fork-tasks.md).
+
 ## Context
 
 Private fork (`Wheels35/kaneo`), used as an ideas dump and as the task layer for an agent hub. Boards: Ideas, a Project board of phase cards, and per-phase boards. Phase cards link to tasks on other boards through cross-project `subtask` relations. Source brief: `kaneo-fork-handoff.md`.
@@ -25,56 +27,56 @@ Corrections to the handoff: the repo uses pnpm + Vite+ (`vp`), not Bun. The i18n
 
 The bug is in `apps/web/src/components/task/task-details-content.tsx:43-74`: the key uses the current `project.slug` and the link uses the current `projectId`.
 
-- [ ] Add `apps/web/src/components/task/use-open-task.ts`, a `useOpenTask(workspaceId, currentProjectId)` hook. For a same-project task it calls `navigate({ to: ".", search: { taskId } })`. For another project it opens the full route `/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId` with the task's own `projectId`. The logic is lifted from `SubtasksChip.openTask` (`apps/web/src/components/task-chips/subtasks-chip.tsx:33-47`).
-- [ ] `task-details-content.tsx`:
+- Add `apps/web/src/components/task/use-open-task.ts`, a `useOpenTask(workspaceId, currentProjectId)` hook. For a same-project task it calls `navigate({ to: ".", search: { taskId } })`. For another project it opens the full route `/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId` with the task's own `projectId`. The logic is lifted from `SubtasksChip.openTask` (`apps/web/src/components/task-chips/subtasks-chip.tsx:33-47`).
+- `task-details-content.tsx`:
   - Use `findParentRelation` (`apps/web/src/components/task/task-relation-link.ts`).
   - Build the key with `useProjectSlugs(workspaceId)` (`apps/web/src/components/task/sections/use-project-slugs.ts`) as `displayIdOf(parentTask.projectId, parentTask.number)`. Hide the key when it is `null` (archived parent project).
   - Navigate with `useOpenTask`.
-- [ ] Use `useOpenTask` in `subtasks-chip.tsx` and `task-relations.tsx:231-236`, which has the same wrong-`projectId` bug for blocks/related links.
+- Use `useOpenTask` in `subtasks-chip.tsx` and `task-relations.tsx:231-236`, which has the same wrong-`projectId` bug for blocks/related links.
 
 ## Step 2: Parent line on cards and list rows (1b)
 
 **API**
-- [ ] Add `apps/api/src/task/get-task-parents.ts`, modeled on `get-subtask-counts.ts` with the join reversed:
+- Add `apps/api/src/task/get-task-parents.ts`, modeled on `get-subtask-counts.ts` with the join reversed:
   - Filter `targetTaskId IN (taskIds)` and `relationType = 'subtask'`. Join the parent task and its project.
   - Keep the same `workspaceId` and `projectAccessCondition(userId, …)` filters. No `archivedAt` filter.
   - Return `Map<childId, { id, number, title, projectId, projectSlug }>`. When a task has several parents, use the oldest relation.
-- [ ] `apps/api/src/task/controllers/get-tasks.ts`: call it next to `getSubtaskCounts` (~212) and set `parent: parents.get(task.id) ?? null` in the three mappers (~436/446/455). Skip it on public boards (`publicOnly`): no private parent can leak, and the public revision hash stays untouched.
-- [ ] `apps/api/src/task/controllers/get-task.ts` (`view=board`): include `parent`, so live single-task refreshes keep it current.
-- [ ] `apps/api/src/task/response.ts`: add a nullable optional `parent` to `boardTaskSchema` and `taskWithAssigneeSchema`.
-- [ ] Live refresh of the child's board. `create-task-relation.ts:134` and `delete-task-relation.ts:60` publish only to the parent's project. For a cross-project `subtask` relation, also `publishEvent("subtask-parents.refresh", { projects: [{ projectId: childProjectId }] })`. That event reuses `refreshParentBoards` (`apps/api/src/ws/index.ts:958`). A renamed parent stays stale on child boards until their next refetch; this is accepted.
+- `apps/api/src/task/controllers/get-tasks.ts`: call it next to `getSubtaskCounts` (~212) and set `parent: parents.get(task.id) ?? null` in the three mappers (~436/446/455). Skip it on public boards (`publicOnly`): no private parent can leak, and the public revision hash stays untouched.
+- `apps/api/src/task/controllers/get-task.ts` (`view=board`): include `parent`, so live single-task refreshes keep it current.
+- `apps/api/src/task/response.ts`: add a nullable optional `parent` to `boardTaskSchema` and `taskWithAssigneeSchema`.
+- Live refresh of the child's board. `create-task-relation.ts:134` and `delete-task-relation.ts:60` publish only to the parent's project. For a cross-project `subtask` relation, also `publishEvent("subtask-parents.refresh", { projects: [{ projectId: childProjectId }] })`. That event reuses `refreshParentBoards` (`apps/api/src/ws/index.ts:958`). A renamed parent stays stale on child boards until their next refetch; this is accepted.
 
 **Web**
-- [ ] `apps/web/src/types/task/index.ts`: add `parent?: { id; number; title; projectId; projectSlug } | null`.
-- [ ] Add `apps/web/src/components/task-chips/parent-task-link.tsx`:
+- `apps/web/src/types/task/index.ts`: add `parent?: { id; number; title; projectId; projectSlug } | null`.
+- Add `apps/web/src/components/task-chips/parent-task-link.tsx`:
   - Renders `↑ KEY-5 Parent title` as a truncated `<button>` with `stopCardEvents` (`task-chips/stop-card-events`) and `useOpenTask`.
   - Renders nothing without `task.parent`.
   - The aria-label comes from a new i18n key `tasks:parent.open`.
-- [ ] Kanban: render it above the title in `apps/web/src/components/kanban-board/task-card/task-card-content.tsx` (~186).
-- [ ] List: render it in `apps/web/src/components/list-view/task-row-body.tsx` near the title, only when the row isn't already nested under its parent (`depth === 0`). Backlog rows reuse `TaskRowBody`.
-- [ ] Confirm that the `BoardTask` Effect schema in `packages/cli/src/api/schemas.ts` ignores unknown keys. Mobile and MCP pass the field through.
+- Kanban: render it above the title in `apps/web/src/components/kanban-board/task-card/task-card-content.tsx` (~186).
+- List: render it in `apps/web/src/components/list-view/task-row-body.tsx` near the title, only when the row isn't already nested under its parent (`depth === 0`). Backlog rows reuse `TaskRowBody`.
+- Confirm that the `BoardTask` Effect schema in `packages/cli/src/api/schemas.ts` ignores unknown keys. Mobile and MCP pass the field through.
 
 ## Step 3: New permissions + backfill
 
-- [ ] `packages/permissions/src/index.ts`:
+- `packages/permissions/src/index.ts`:
   - `task` gains `"move_to_done"` and `"override_open_subtasks"`.
   - `member` gets `move_to_done`; `admin` and `owner` get both.
   - Update `index.test.ts`, which asserts the exact `task` array.
-- [ ] Add a one-time data migration, `apps/api/src/migrations/task-done-permissions-migration.ts`, modeled on `column-migration.ts`. It uses `pg_advisory_xact_lock` plus the `dataMigrationTable` marker `task-done-permissions-v1`.
+- Add a one-time data migration, `apps/api/src/migrations/task-done-permissions-migration.ts`, modeled on `column-migration.ts`. It uses `pg_advisory_xact_lock` plus the `dataMigrationTable` marker `task-done-permissions-v1`.
   - For every `workspace_role` row, default and custom: if `task` includes `update`, add `move_to_done`.
   - If the row's role is `admin`, also add `override_open_subtasks`.
   - Update rows in place. Never insert: duplicate rows OR together in `rolesAllow`.
   - Call it at boot in `apps/api/src/index.ts`, next to `seedDefaultWorkspaceRoles` (~1052).
   - Why it's needed: the seed only inserts missing rows, and a stored row fully replaces the built-in role (`role-permissions.ts:59-67`). Owner is static, so it picks the change up from the package.
   - Result: nobody loses anything on upgrade. You then create the agent role with both switches off.
-- [ ] Roles editor (`apps/web/src/routes/_layout/_authenticated/dashboard/settings/workspace/roles.tsx`): the switches appear automatically from `statement`. Add entries to `PERMISSION_LABELS`, and add the i18n keys `settings.workspaceRoles.permissions.task.{move_to_done,override_open_subtasks}.{label,description}` in `i18n/en-US.json`. Then run `pnpm i18n:schema` and `pnpm i18n:check:fix` to fill the other 21 locales.
+- Roles editor (`apps/web/src/routes/_layout/_authenticated/dashboard/settings/workspace/roles.tsx`): the switches appear automatically from `statement`. Add entries to `PERMISSION_LABELS`, and add the i18n keys `settings.workspaceRoles.permissions.task.{move_to_done,override_open_subtasks}.{label,description}` in `i18n/en-US.json`. Then run `pnpm i18n:schema` and `pnpm i18n:check:fix` to fill the other 21 locales.
 - Not changed: scoped API keys. The UI only creates unscoped keys, and agents use their own user. Instance admins bypass role checks (`hasWorkspacePermission`), so an agent user must never be an instance admin.
 
 ## Step 4: "Block open subtasks" column setting
 
-- [ ] Schema: `columnTable.blockOpenSubtasks`, `boolean("block_open_subtasks").default(false).notNull()` (`apps/api/src/database/schema.ts:600`). Run `pnpm --filter @kaneo/api db:generate` and inspect the SQL. Default false means no data migration.
-- [ ] API: add `blockOpenSubtasks` to `apps/api/src/column/schema.ts` (create + update bodies), `column/response.ts` (with an OpenAPI description), `column/index.ts` (pass-through), `controllers/create-column.ts` and `controllers/update-column.ts`. The existing `project.updated` publish refreshes boards.
-- [ ] Web column editor:
+- Schema: `columnTable.blockOpenSubtasks`, `boolean("block_open_subtasks").default(false).notNull()` (`apps/api/src/database/schema.ts:600`). Run `pnpm --filter @kaneo/api db:generate` and inspect the SQL. Default false means no data migration.
+- API: add `blockOpenSubtasks` to `apps/api/src/column/schema.ts` (create + update bodies), `column/response.ts` (with an OpenAPI description), `column/index.ts` (pass-through), `controllers/create-column.ts` and `controllers/update-column.ts`. The existing `project.updated` publish refreshes boards.
+- Web column editor:
   - Add a second `Switch` in `apps/web/src/components/project/columns/column-row.tsx`, next to the Done switch, with a header label in `column-list.tsx`.
   - Update the `ProjectColumn` type, the `fetchers/column/{create,update}-column.ts` fetchers, and `use-update-column.ts`.
   - Add i18n keys under `settings:columnEditor`.
@@ -94,27 +96,27 @@ New folder `apps/api/src/task/status-guard/`, one concern per file, with tests b
   2. **Rule 2:** for into-gated moves, load blockers. If there are none, allow. If the request has `force` and `can({ task: ["override_open_subtasks"] })`, allow and return the forced counts. Otherwise return **409** `OPEN_SUBTASKS` with `overridable` and `blockers: [{ taskId, id, key, title, relation: "subtask" | "blocked_by" }]`. The `message` lists keys and titles (at most 5, then "and N more"), because MCP and the CLI only show `message`.
 
 Error contract:
-- [ ] Extend `ApiErrorBody` and `ApiError` (`apps/api/src/errors/api-error.ts`), the `errorBody` in `http-exception-response.ts`, and `api-error-schema.ts` with optional `overridable` and `blockers`.
+- Extend `ApiErrorBody` and `ApiError` (`apps/api/src/errors/api-error.ts`), the `errorBody` in `http-exception-response.ts`, and `api-error-schema.ts` with optional `overridable` and `blockers`.
 
 Call sites. Each runs inside its transaction against the locked before-row, and each handler builds `statusGuard(c)` and passes it in. Shared `forceQuery` (`force: "true" | "false"` optional) on the moving routes in `apps/api/src/task/index.ts`:
-- [ ] `PUT /task/status/{id}`: `controllers/update-task-status.ts`, inside `withLockedTask` after `assertValidTaskStatus`.
-- [ ] `PUT /task/{id}`: `controllers/update-task.ts`, against the locked row read (~91-107).
-- [ ] `PATCH /task/bulk`: `controllers/bulk-update-tasks.ts`, `updateStatus` and move-to-board branches. All or nothing; blockers grouped by `taskId`.
-- [ ] `POST /task/reorder`: `controllers/reorder-tasks.ts`, only rows whose `status` changes.
-- [ ] `PUT /task/move/{id}`: `controllers/move-task.ts`. Finality and gating are judged against the **destination** project's columns.
-- [ ] Rule 1 only (new tasks have no children): `POST /task/{projectId}` (`create-task.ts`), `POST /task/duplicate/{id}` (`duplicate-task.ts`), `POST /task/import/{projectId}` (`import-tasks.ts`). The recurrence path (`recurrence/create-next-occurrence.ts`) is a system path, never targets a final column, and passes no guard.
-- [ ] Update route descriptions, run `pnpm openapi:check:fix`, and commit `apps/docs/openapi.json`.
+- `PUT /task/status/{id}`: `controllers/update-task-status.ts`, inside `withLockedTask` after `assertValidTaskStatus`.
+- `PUT /task/{id}`: `controllers/update-task.ts`, against the locked row read (~91-107).
+- `PATCH /task/bulk`: `controllers/bulk-update-tasks.ts`, `updateStatus` and move-to-board branches. All or nothing; blockers grouped by `taskId`.
+- `POST /task/reorder`: `controllers/reorder-tasks.ts`, only rows whose `status` changes.
+- `PUT /task/move/{id}`: `controllers/move-task.ts`. Finality and gating are judged against the **destination** project's columns.
+- Rule 1 only (new tasks have no children): `POST /task/{projectId}` (`create-task.ts`), `POST /task/duplicate/{id}` (`duplicate-task.ts`), `POST /task/import/{projectId}` (`import-tasks.ts`). The recurrence path (`recurrence/create-next-occurrence.ts`) is a system path, never targets a final column, and passes no guard.
+- Update route descriptions, run `pnpm openapi:check:fix`, and commit `apps/docs/openapi.json`.
 - MCP is covered automatically: both MCP servers call these REST routes over HTTP (`apps/api/src/mcp/tools.ts`, `packages/mcp/src/kaneo/client.ts`). No `force` parameter is added to the MCP tools.
 
 ## Step 6: Web dialog and force retry
 
-- [ ] `apps/web/src/lib/parse-api-error-body.ts` and `lib/http-error.ts`: carry `overridable` and `blockers`. Add `lib/is-open-subtasks-error.ts`, modeled on `is-workspace-archived-error.ts`.
-- [ ] Add `apps/web/src/components/open-subtasks/`:
+- `apps/web/src/lib/parse-api-error-body.ts` and `lib/http-error.ts`: carry `overridable` and `blockers`. Add `lib/is-open-subtasks-error.ts`, modeled on `is-workspace-archived-error.ts`.
+- Add `apps/web/src/components/open-subtasks/`:
   - `open-subtasks-store.ts` (zustand): holds `{ error, retry }`.
   - `open-subtasks-dialog.tsx`: built on `ConfirmDialog` (`components/settings/confirm-dialog.tsx`). It lists the blockers ("2 subtasks aren't done"). It shows "Move anyway" only when `overridable`; otherwise it shows the reason with a Close button. It is mounted once in the authenticated layout.
   - `handle-status-move-error.ts`: shows the dialog for `OPEN_SUBTASKS`; otherwise shows a toast with the server message.
-- [ ] Fetchers take `force?: boolean` and send it as the query `force=true`: `fetchers/task/{update-task-status,update-task,reorder-tasks,move-task,bulk-operation}.ts`.
-- [ ] Wire every status path to the handler:
+- Fetchers take `force?: boolean` and send it as the query `force=true`: `fetchers/task/{update-task-status,update-task,reorder-tasks,move-task,bulk-operation}.ts`.
+- Wire every status path to the handler:
   - Board drag and keyboard move (`kanban-board/index.tsx` `commitMove`: roll back, then show the dialog; confirming re-runs with force).
   - Context menu (`task-card-context-menu-content.tsx`).
   - Detail status (`task-status-popover.tsx`).
@@ -123,12 +125,12 @@ Call sites. Each runs inside its transaction against the locked before-row, and 
   - Move to project (`use-move-task.ts`).
   - Bulk (`use-bulk-operations.ts` `run()`).
   - List view drag (`list-view/index.tsx` `moveTask`). This path has no `onError` today; add a rollback as well.
-- [ ] Add i18n keys for the dialog under `tasks:openSubtasks.*`.
+- Add i18n keys for the dialog under `tasks:openSubtasks.*`.
 
 ## Step 7: Activity note and docs
 
-- [ ] Forced moves: pass `forcedOpenSubtasks: N` through the `task.status_changed` payload (`task-mutation-effects.ts:72-82`) into `eventData` (`apps/api/src/activity/index.ts:288`). Render "moved to Done with N open subtasks" in `apps/web/src/components/activity/index.tsx`.
-- [ ] Docs:
+- Forced moves: pass `forcedOpenSubtasks: N` through the `task.status_changed` payload (`task-mutation-effects.ts:72-82`) into `eventData` (`apps/api/src/activity/index.ts:288`). Render "moved to Done with N open subtasks" in `apps/web/src/components/activity/index.tsx`.
+- Docs:
   - `apps/docs/core/functional/collaborate-with-team.mdx`: add the two permissions to the role table and a short "agent role" setup section (custom role, both switches off, no `project:update`, own user and key).
   - `apps/docs/api-reference/errors.mdx`: document `OPEN_SUBTASKS`, `overridable`, `blockers` and `force`.
 
