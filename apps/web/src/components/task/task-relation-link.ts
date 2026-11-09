@@ -33,7 +33,10 @@ export function buildRelationLink(
   };
 }
 
-export function findParentRelation(taskId: string, relations: RelationEdge[]) {
+export function findParentRelation<T extends RelationEdge>(
+  taskId: string,
+  relations: T[],
+) {
   return relations.find(
     (relation) =>
       relation.relationType === "subtask" && relation.targetTaskId === taskId,

@@ -1,4 +1,3 @@
-import { useNavigate } from "@tanstack/react-router";
 import { UserRoundIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import useAuth from "@/components/providers/auth-provider/hooks/use-auth";
@@ -11,7 +10,9 @@ import { useShortcut } from "@/lib/shortcuts/use-shortcut";
 import { toast } from "@/lib/toast";
 import { useTaskCopyActions } from "./header/use-task-copy-actions";
 import { clickTaskAction, focusTaskAction } from "./task-action-target";
+import { findParentRelation } from "./task-relation-link";
 import { useRelationPickerStore } from "./task-relation-picker-store";
+import { useOpenTask } from "./use-open-task";
 
 type TaskShortcutsProps = {
   taskId: string;
@@ -27,7 +28,6 @@ export function TaskShortcuts({
   enabled = true,
 }: TaskShortcutsProps) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { data: task } = useGetTask(taskId);
   const copyActions = useTaskCopyActions({ taskId, projectId, workspaceId });
@@ -40,13 +40,7 @@ export function TaskShortcuts({
   const editable = { enabled: active.enabled && canUpdateTasks() };
   const assignable = { enabled: active.enabled && canAssignTasks() };
 
-  const openTask = (id: string | undefined) => {
-    if (!id) return;
-    navigate({
-      to: "/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId",
-      params: { workspaceId, projectId, taskId: id },
-    });
-  };
+  const openTask = useOpenTask(workspaceId);
 
   useShortcut("changeStatus", () => clickTaskAction("status"), editable);
   useShortcut("changePriority", () => clickTaskAction("priority"), editable);
@@ -125,26 +119,22 @@ export function TaskShortcuts({
 
   useShortcut(
     "openParent",
-    () =>
-      openTask(
-        relations.find(
-          (relation) =>
-            relation.relationType === "subtask" &&
-            relation.targetTaskId === taskId,
-        )?.sourceTaskId,
-      ),
+    () => {
+      const parent = findParentRelation(taskId, relations)?.sourceTask;
+      if (parent) openTask(parent);
+    },
     active,
   );
   useShortcut(
     "openSubtask",
-    () =>
-      openTask(
-        relations.find(
-          (relation) =>
-            relation.relationType === "subtask" &&
-            relation.sourceTaskId === taskId,
-        )?.targetTaskId,
-      ),
+    () => {
+      const subtask = relations.find(
+        (relation) =>
+          relation.relationType === "subtask" &&
+          relation.sourceTaskId === taskId,
+      )?.targetTask;
+      if (subtask) openTask(subtask);
+    },
     active,
   );
 

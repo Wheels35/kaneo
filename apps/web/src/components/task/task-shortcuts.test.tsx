@@ -35,12 +35,16 @@ const mocks = vi.hoisted(() => ({
       sourceTaskId: "parent-1",
       targetTaskId: "task-1",
       relationType: "subtask",
+      sourceTask: { id: "parent-1", projectId: "project-2" },
+      targetTask: { id: "task-1", projectId: "project-1" },
     },
     {
       id: "child-link",
       sourceTaskId: "task-1",
       targetTaskId: "child-1",
       relationType: "subtask",
+      sourceTask: { id: "task-1", projectId: "project-1" },
+      targetTask: { id: "child-1", projectId: "project-1" },
     },
   ],
 }));
@@ -217,7 +221,7 @@ describe("TaskShortcuts", () => {
     });
   });
 
-  it("opens the parent task and the first subtask", () => {
+  it("opens the parent task on its own board and the first subtask", () => {
     renderTaskShortcuts();
 
     press({ key: "ArrowUp", code: "ArrowUp", ctrlKey: true, shiftKey: true });
@@ -233,7 +237,7 @@ describe("TaskShortcuts", () => {
     ).toEqual([
       {
         workspaceId: "workspace-1",
-        projectId: "project-1",
+        projectId: "project-2",
         taskId: "parent-1",
       },
       {

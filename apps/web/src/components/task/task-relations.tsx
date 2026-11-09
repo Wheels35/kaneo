@@ -1,4 +1,3 @@
-import { useNavigate } from "@tanstack/react-router";
 import { Ban, Link2, Search, X } from "lucide-react";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -52,6 +51,7 @@ import { SectionHeader } from "./sections/section-header";
 import { TaskReferenceRow } from "./sections/task-reference-row";
 import { useProjectSlugs } from "./sections/use-project-slugs";
 import SubtaskStatusPopover from "./subtask-status-popover";
+import { useOpenTask } from "./use-open-task";
 
 const relationOrder: Record<RelationKind, number> = {
   blocked_by: 0,
@@ -84,7 +84,7 @@ export default function TaskRelations({
   workspaceId,
 }: TaskRelationsProps) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const openTask = useOpenTask(workspaceId);
   const [commandOpen, setCommandOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRelationType, setSelectedRelationType] =
@@ -228,13 +228,6 @@ export default function TaskRelations({
     deleteRelation.mutate(relationId);
   };
 
-  const handleNavigateToTask = (linkedTaskId: string) => {
-    navigate({
-      to: "/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId",
-      params: { workspaceId, projectId, taskId: linkedTaskId },
-    });
-  };
-
   const getAssignee = (userId: string | null) => {
     if (!userId || !workspaceUsers?.members) return null;
     return workspaceUsers.members.find((member) => member.userId === userId);
@@ -317,7 +310,7 @@ export default function TaskRelations({
                     )}
                     title={item.task.title}
                     done={isFinal}
-                    onOpen={() => handleNavigateToTask(item.task.id)}
+                    onOpen={() => openTask(item.task)}
                     tag={<RelationTag kind={item.kind} />}
                     assignee={
                       <ReferenceAssigneeButton
@@ -331,9 +324,7 @@ export default function TaskRelations({
                 </ContextMenuTrigger>
 
                 <ContextMenuContent className="w-40">
-                  <ContextMenuItem
-                    onClick={() => handleNavigateToTask(item.task.id)}
-                  >
+                  <ContextMenuItem onClick={() => openTask(item.task)}>
                     <span>{t("tasks:relations.openTask")}</span>
                   </ContextMenuItem>
                   {canEdit && (

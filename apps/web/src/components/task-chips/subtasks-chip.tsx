@@ -1,6 +1,6 @@
-import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useOpenTask } from "@/components/task/use-open-task";
 import {
   HoverCard,
   HoverCardContent,
@@ -25,25 +25,14 @@ export function SubtasksChip({
   className,
 }: SubtasksChipProps) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const openSubtask = useOpenTask(workspaceId, task.projectId);
   const [open, setOpen] = useState(false);
   const counts = task.subtaskCounts;
   if (!counts?.total) return null;
 
   const openTask = (subtask: Pick<Task, "id" | "projectId">) => {
     setOpen(false);
-    if (subtask.projectId === task.projectId) {
-      navigate({ to: ".", search: { taskId: subtask.id } });
-      return;
-    }
-    navigate({
-      to: "/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId",
-      params: {
-        workspaceId,
-        projectId: subtask.projectId,
-        taskId: subtask.id,
-      },
-    });
+    openSubtask(subtask);
   };
 
   return (

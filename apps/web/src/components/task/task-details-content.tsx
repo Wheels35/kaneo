@@ -1,19 +1,20 @@
-import { useNavigate } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { ExternalLinksAccordion } from "@/components/external-links/external-links-accordion";
 import useExternalLinks from "@/hooks/queries/external-link/use-external-links";
-import useGetProject from "@/hooks/queries/project/use-get-project";
 import useGetTask from "@/hooks/queries/task/use-get-task";
 import useGetTaskRelations from "@/hooks/queries/task-relation/use-get-task-relations";
 import { cn } from "@/lib/cn";
 import type { ExternalLink } from "@/types/external-link";
+import { useProjectSlugs } from "./sections/use-project-slugs";
 import { TaskActivity } from "./task-activity";
 import TaskDescription from "./task-description";
+import { findParentRelation } from "./task-relation-link";
 import TaskRelations from "./task-relations";
 import TaskSubtasks from "./task-subtasks";
 import TaskTitle from "./task-title";
+import { useOpenTask } from "./use-open-task";
 
 type TaskDetailsContentProps = {
   taskId: string | undefined;
@@ -33,18 +34,18 @@ export default function TaskDetailsContent({
   properties,
 }: TaskDetailsContentProps) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { data: task } = useGetTask(taskId ?? "");
-  const { data: project } = useGetProject({ id: projectId, workspaceId });
   const { data: externalLinks = [], isLoading: isLoadingExternalLinks } =
     useExternalLinks(taskId ?? "");
   const { data: relations = [] } = useGetTaskRelations(taskId ?? "");
-
-  const parentTask = relations.find(
-    (rel) => rel.relationType === "subtask" && rel.targetTaskId === taskId,
-  )?.sourceTask;
+  const displayIdOf = useProjectSlugs(workspaceId);
+  const openTask = useOpenTask(workspaceId);
 
   if (!taskId) return null;
+
+  const parentTask = findParentRelation(taskId, relations)?.sourceTask;
+  const parentKey =
+    parentTask && displayIdOf(parentTask.projectId, parentTask.number);
 
   return (
     <div className={cn("flex flex-col", className)}>
@@ -53,19 +54,12 @@ export default function TaskDetailsContent({
           <button
             type="button"
             className="flex w-fit min-w-0 items-center gap-1.5 rounded-sm text-muted-foreground text-xs outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-            onClick={() =>
-              navigate({
-                to: "/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId",
-                params: { workspaceId, projectId, taskId: parentTask.id },
-              })
-            }
+            onClick={() => openTask(parentTask)}
           >
             <ArrowUpRight className="size-3 shrink-0" />
             <span className="shrink-0">{t("tasks:detail.subtaskOf")}</span>
-            {project?.slug && parentTask.number != null && (
-              <span className="shrink-0 font-mono">
-                {project.slug}-{parentTask.number}
-              </span>
+            {parentKey && (
+              <span className="shrink-0 font-mono">{parentKey}</span>
             )}
             <span className="truncate font-medium text-foreground/80">
               {parentTask.title}

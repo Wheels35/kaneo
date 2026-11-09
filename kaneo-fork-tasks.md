@@ -4,9 +4,9 @@ Work items for [kaneo-fork-plan.md](./kaneo-fork-plan.md); design details and fi
 
 ## 1. Detail page cross-project parent fix
 
-- [ ] Add `useOpenTask(workspaceId, currentProjectId)` in `apps/web/src/components/task/use-open-task.ts`
-- [ ] Fix the parent key and link in `task-details-content.tsx` (`findParentRelation`, `useProjectSlugs`, `useOpenTask`)
-- [ ] Switch `subtasks-chip.tsx` and `task-relations.tsx` navigation to `useOpenTask`
+- [x] Add `useOpenTask(workspaceId, currentProjectId)` in `apps/web/src/components/task/use-open-task.ts`
+- [x] Fix the parent key and link in `task-details-content.tsx` (`findParentRelation`, `useProjectSlugs`, `useOpenTask`)
+- [x] Switch `subtasks-chip.tsx` and `task-relations.tsx` navigation to `useOpenTask`
 - [ ] Check: a parent on another board shows its own key and opens its own board
 
 ## 2. Parent line on cards and list rows
