@@ -1178,7 +1178,7 @@
 			"moveTargetLabel": "वर्कस्पेस",
 			"moving": "ले जाया जा रहा है...",
 			"tasksTitle": "कार्य",
-			"subtasksBlockParentDescription": "Linking a subtask to a task on this board also marks the subtask as blocking it. Only links made while this is on.",
+			"subtasksBlockParentDescription": "When you add a subtask to a task on this board, the subtask is also marked as blocking it. Subtasks added before you turn this on aren't changed.",
 			"subtasksBlockParentTitle": "Subtasks block their parent"
 		},
 		"projectIntegrations": {

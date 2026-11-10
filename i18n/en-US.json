@@ -1868,7 +1868,7 @@
 			"toastMoveError": "Failed to move project",
 			"tasksTitle": "Tasks",
 			"subtasksBlockParentTitle": "Subtasks block their parent",
-			"subtasksBlockParentDescription": "Linking a subtask to a task on this board also marks the subtask as blocking it. Only links made while this is on.",
+			"subtasksBlockParentDescription": "When you add a subtask to a task on this board, the subtask is also marked as blocking it. Subtasks added before you turn this on aren't changed.",
 			"moveTargetLabel": "Workspace",
 			"moveDialogTitle": "Move to another workspace?",
 			"moveDialogDescription": "Tasks assigned to people outside the new workspace become unassigned, and notification subscriptions for this project are cleared.",
