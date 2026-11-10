@@ -14,10 +14,11 @@ async function updateProject({
   slug,
   description,
   isPublic,
+  subtasksBlockParent,
 }: UpdateProjectRequest) {
   const response = await client.project[":id"].$put({
     param: { id },
-    json: { name, icon, slug, description, isPublic },
+    json: { name, icon, slug, description, isPublic, subtasksBlockParent },
   });
 
   if (!response.ok) {

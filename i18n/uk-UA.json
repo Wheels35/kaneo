@@ -940,7 +940,9 @@
 			"moveDialogTitle": "Перемістити до іншого робочого простору?",
 			"moveTargetLabel": "Робочий простір",
 			"moving": "Переміщення...",
-			"tasksTitle": "Завдання"
+			"tasksTitle": "Завдання",
+			"subtasksBlockParentDescription": "Linking a subtask to a task on this board also marks the subtask as blocking it. Only links made while this is on.",
+			"subtasksBlockParentTitle": "Subtasks block their parent"
 		},
 		"projectIntegrations": {
 			"pageTitle": "Інтеґрації",
@@ -3524,7 +3526,9 @@
 				"blocked_by": "заблоковано"
 			},
 			"blockedBy": "Блокується",
-			"parentPlaceholder": "Задати батьківське завдання…"
+			"parentPlaceholder": "Задати батьківське завдання…",
+			"removeBlock": "Remove block",
+			"stillBlocks": "{{child}} still blocks {{parent}}"
 		},
 		"subtasks": {
 			"title": "Підзавдання",

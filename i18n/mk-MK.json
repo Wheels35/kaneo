@@ -924,7 +924,9 @@
 			"moveDialogTitle": "Да се премести во друг работен простор?",
 			"moveTargetLabel": "Работен простор",
 			"moving": "Се преместува...",
-			"tasksTitle": "Задачи"
+			"tasksTitle": "Задачи",
+			"subtasksBlockParentDescription": "Linking a subtask to a task on this board also marks the subtask as blocking it. Only links made while this is on.",
+			"subtasksBlockParentTitle": "Subtasks block their parent"
 		},
 		"projectIntegrations": {
 			"pageTitle": "Интеграции",
@@ -3416,7 +3418,9 @@
 				"blocked_by": "блокирана од"
 			},
 			"blockedBy": "Блокирана од",
-			"parentPlaceholder": "Постави матична задача…"
+			"parentPlaceholder": "Постави матична задача…",
+			"removeBlock": "Remove block",
+			"stillBlocks": "{{child}} still blocks {{parent}}"
 		},
 		"subtasks": {
 			"title": "Подзадачи",

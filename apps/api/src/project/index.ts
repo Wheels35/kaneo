@@ -537,7 +537,8 @@ const project = apiRouter<BaseVariables & { workspaceId: string }>()
   })
   .openapi(updateProjectRoute, async (c) => {
     const { id } = c.req.valid("param");
-    const { name, icon, slug, description, isPublic } = c.req.valid("json");
+    const { name, icon, slug, description, isPublic, subtasksBlockParent } =
+      c.req.valid("json");
     const workspaceId = c.get("workspaceId");
     const updatedProject = await updateProjectCtrl(
       id,
@@ -548,6 +549,7 @@ const project = apiRouter<BaseVariables & { workspaceId: string }>()
       isPublic,
       workspaceId,
       await hasWorkspacePermission(c, { project: ["share"] }),
+      subtasksBlockParent,
     );
     return c.json(toPublicProject(updatedProject), 200);
   })

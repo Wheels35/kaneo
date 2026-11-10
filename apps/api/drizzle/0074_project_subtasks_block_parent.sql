@@ -1,0 +1,1 @@
+ALTER TABLE "project" ADD COLUMN "subtasks_block_parent" boolean DEFAULT false NOT NULL;

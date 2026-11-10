@@ -51,6 +51,7 @@ import { SectionHeader } from "./sections/section-header";
 import { TaskReferenceRow } from "./sections/task-reference-row";
 import { useProjectSlugs } from "./sections/use-project-slugs";
 import SubtaskStatusPopover from "./subtask-status-popover";
+import { useOfferBlockRemoval } from "./use-offer-block-removal";
 import { useOpenTask } from "./use-open-task";
 
 const relationOrder: Record<RelationKind, number> = {
@@ -106,6 +107,7 @@ export default function TaskRelations({
   const { canUpdateTasks } = useWorkspacePermission();
   const canEdit = canUpdateTasks();
   const displayIdOf = useProjectSlugs(workspaceId);
+  const offerBlockRemoval = useOfferBlockRemoval(taskId, workspaceId);
 
   useEffect(() => {
     if (!relationRequest || relationRequest.taskId !== taskId) return;
@@ -216,6 +218,7 @@ export default function TaskRelations({
       );
       if (previousParent) {
         await deleteRelation.mutateAsync(previousParent.id);
+        offerBlockRemoval(previousParent.sourceTaskId);
       }
       setCommandOpen(false);
       setSearchQuery("");

@@ -1087,7 +1087,9 @@
 			"moveDialogTitle": "In anderen Workspace verschieben?",
 			"moveTargetLabel": "Workspace",
 			"moving": "Wird verschoben...",
-			"tasksTitle": "Aufgaben"
+			"tasksTitle": "Aufgaben",
+			"subtasksBlockParentDescription": "Linking a subtask to a task on this board also marks the subtask as blocking it. Only links made while this is on.",
+			"subtasksBlockParentTitle": "Subtasks block their parent"
 		},
 		"projectIntegrations": {
 			"pageTitle": "Integrationen",
@@ -3416,7 +3418,9 @@
 				"blocked_by": "blockiert von"
 			},
 			"blockedBy": "Blockiert durch",
-			"parentPlaceholder": "Übergeordnete Aufgabe festlegen…"
+			"parentPlaceholder": "Übergeordnete Aufgabe festlegen…",
+			"removeBlock": "Remove block",
+			"stillBlocks": "{{child}} still blocks {{parent}}"
 		},
 		"subtasks": {
 			"title": "Teilaufgaben",

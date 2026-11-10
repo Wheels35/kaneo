@@ -1867,6 +1867,8 @@
 			"toastMovedWithUnassigned": "Project moved successfully. {{taskCount}} task(s) were unassigned.",
 			"toastMoveError": "Failed to move project",
 			"tasksTitle": "Tasks",
+			"subtasksBlockParentTitle": "Subtasks block their parent",
+			"subtasksBlockParentDescription": "Linking a subtask to a task on this board also marks the subtask as blocking it. Only links made while this is on.",
 			"moveTargetLabel": "Workspace",
 			"moveDialogTitle": "Move to another workspace?",
 			"moveDialogDescription": "Tasks assigned to people outside the new workspace become unassigned, and notification subscriptions for this project are cleared.",
@@ -3420,7 +3422,9 @@
 				"related": "relates to"
 			},
 			"blockedBy": "Blocked by",
-			"parentPlaceholder": "Set parent task…"
+			"parentPlaceholder": "Set parent task…",
+			"stillBlocks": "{{child}} still blocks {{parent}}",
+			"removeBlock": "Remove block"
 		},
 		"subtasks": {
 			"progress": "{{completed}} of {{total}} subtasks completed",

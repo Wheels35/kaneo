@@ -807,7 +807,9 @@
 			"moveDialogTitle": "¿Mover a otro espacio de trabajo?",
 			"moveTargetLabel": "Espacio de trabajo",
 			"moving": "Moviendo...",
-			"tasksTitle": "Tareas"
+			"tasksTitle": "Tareas",
+			"subtasksBlockParentDescription": "Linking a subtask to a task on this board also marks the subtask as blocking it. Only links made while this is on.",
+			"subtasksBlockParentTitle": "Subtasks block their parent"
 		},
 		"projectIntegrations": {
 			"pageTitle": "Integraciones",
@@ -3470,7 +3472,9 @@
 				"blocked_by": "bloqueada por"
 			},
 			"blockedBy": "Bloqueada por",
-			"parentPlaceholder": "Establecer tarea principal…"
+			"parentPlaceholder": "Establecer tarea principal…",
+			"removeBlock": "Remove block",
+			"stillBlocks": "{{child}} still blocks {{parent}}"
 		},
 		"subtasks": {
 			"title": "Sub-tareas",

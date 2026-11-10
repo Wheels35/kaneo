@@ -18,6 +18,10 @@ export const projectSchema = z
       description:
         "When true the project's board is readable without signing in, via /api/public-project/{id}.",
     }),
+    subtasksBlockParent: z.boolean().openapi({
+      description:
+        "When true, linking a subtask to a task on this board also links the subtask as blocking that task, so it cannot enter a Block while blocked column until the subtask is done. Affects only links made while it is on.",
+    }),
     archivedAt: nullableResponseTimestamp.openapi({
       description:
         "Non-null once archived; archived projects are hidden by default.",

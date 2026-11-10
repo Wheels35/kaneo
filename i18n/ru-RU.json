@@ -940,7 +940,9 @@
 			"moveDialogTitle": "Переместить в другую рабочую область?",
 			"moveTargetLabel": "Рабочая область",
 			"moving": "Перемещение...",
-			"tasksTitle": "Задачи"
+			"tasksTitle": "Задачи",
+			"subtasksBlockParentDescription": "Linking a subtask to a task on this board also marks the subtask as blocking it. Only links made while this is on.",
+			"subtasksBlockParentTitle": "Subtasks block their parent"
 		},
 		"projectIntegrations": {
 			"pageTitle": "Интеграции",
@@ -3532,7 +3534,9 @@
 				"blocked_by": "заблокирована"
 			},
 			"blockedBy": "Блокируется",
-			"parentPlaceholder": "Задать родительскую задачу…"
+			"parentPlaceholder": "Задать родительскую задачу…",
+			"removeBlock": "Remove block",
+			"stillBlocks": "{{child}} still blocks {{parent}}"
 		},
 		"subtasks": {
 			"title": "Подзадачи",

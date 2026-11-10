@@ -923,6 +923,10 @@
             ],
             "description": "When true the project's board is readable without signing in, via /api/public-project/{id}."
           },
+          "subtasksBlockParent": {
+            "type": "boolean",
+            "description": "When true, linking a subtask to a task on this board also links the subtask as blocking that task, so it cannot enter a Block while blocked column until the subtask is done. Affects only links made while it is on."
+          },
           "archivedAt": {
             "type": [
               "string",
@@ -950,6 +954,7 @@
           "description",
           "createdAt",
           "isPublic",
+          "subtasksBlockParent",
           "archivedAt",
           "position",
           "lastTaskNumber"
@@ -10831,6 +10836,10 @@
                   },
                   "isPublic": {
                     "type": "boolean"
+                  },
+                  "subtasksBlockParent": {
+                    "type": "boolean",
+                    "description": "When true, linking a subtask to a task on this board also links the subtask as blocking that task, so it cannot enter a Block while blocked column until the subtask is done. Affects only links made while it is on. Omit to keep the current value."
                   }
                 },
                 "required": [
@@ -22853,7 +22862,7 @@
           "Task Relations"
         ],
         "summary": "Create task relation",
-        "description": "Link two tasks. Authorization is scoped to the source task's workspace.",
+        "description": "Link two tasks. Authorization is scoped to the source task's workspace. A `subtask` link whose parent (source) is on a board with `subtasksBlockParent` on also adds a `blocks` link from the subtask to the parent, unless the two tasks already have one. The response is the requested link only.",
         "requestBody": {
           "required": true,
           "content": {

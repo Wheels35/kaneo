@@ -1177,7 +1177,9 @@
 			"moveDialogTitle": "दूसरे वर्कस्पेस में ले जाएँ?",
 			"moveTargetLabel": "वर्कस्पेस",
 			"moving": "ले जाया जा रहा है...",
-			"tasksTitle": "कार्य"
+			"tasksTitle": "कार्य",
+			"subtasksBlockParentDescription": "Linking a subtask to a task on this board also marks the subtask as blocking it. Only links made while this is on.",
+			"subtasksBlockParentTitle": "Subtasks block their parent"
 		},
 		"projectIntegrations": {
 			"pageTitle": "एकीकरण",
@@ -3416,7 +3418,9 @@
 				"related": "संबंधित है"
 			},
 			"blockedBy": "इसके द्वारा अवरुद्ध",
-			"parentPlaceholder": "मूल कार्य सेट करें…"
+			"parentPlaceholder": "मूल कार्य सेट करें…",
+			"removeBlock": "Remove block",
+			"stillBlocks": "{{child}} still blocks {{parent}}"
 		},
 		"subtasks": {
 			"title": "उप-कार्य",

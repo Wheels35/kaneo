@@ -159,7 +159,7 @@ const createTaskRelationRoute = createRoute({
   tags: ["Task Relations"],
   summary: "Create task relation",
   description:
-    "Link two tasks. Authorization is scoped to the source task's workspace.",
+    "Link two tasks. Authorization is scoped to the source task's workspace. A `subtask` link whose parent (source) is on a board with `subtasksBlockParent` on also adds a `blocks` link from the subtask to the parent, unless the two tasks already have one. The response is the requested link only.",
   middleware: [
     scopeToSourceTask,
     requireWorkspacePermission({ task: ["update"] }),

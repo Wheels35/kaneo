@@ -9,8 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { DEFAULT_COLUMN_ICON_NAMES } from "@/constants/column-icons";
 import { cn } from "@/lib/cn";
+import { usePendingToggle } from "@/hooks/use-pending-toggle";
 import { getColumnIcon } from "@/lib/column";
-import { usePendingToggle } from "./use-pending-toggle";
 
 type ColumnRowProps = {
   column: ProjectColumn;

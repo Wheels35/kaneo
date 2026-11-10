@@ -916,7 +916,9 @@
 			"moveDialogTitle": "다른 워크스페이스로 이동할까요?",
 			"moveTargetLabel": "워크스페이스",
 			"moving": "이동 중...",
-			"tasksTitle": "작업"
+			"tasksTitle": "작업",
+			"subtasksBlockParentDescription": "Linking a subtask to a task on this board also marks the subtask as blocking it. Only links made while this is on.",
+			"subtasksBlockParentTitle": "Subtasks block their parent"
 		},
 		"projectIntegrations": {
 			"pageTitle": "연동",
@@ -3362,7 +3364,9 @@
 				"blocked_by": "차단됨"
 			},
 			"blockedBy": "차단한 작업",
-			"parentPlaceholder": "상위 작업 설정…"
+			"parentPlaceholder": "상위 작업 설정…",
+			"removeBlock": "Remove block",
+			"stillBlocks": "{{child}} still blocks {{parent}}"
 		},
 		"subtasks": {
 			"title": "하위 작업",

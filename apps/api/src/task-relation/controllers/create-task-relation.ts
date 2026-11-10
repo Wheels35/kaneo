@@ -8,6 +8,7 @@ import {
 } from "../../database/schema";
 import { publishEvent } from "../../events";
 import { assertProjectAccess } from "../../project-access/assert-project-access";
+import { addSubtaskBlock } from "../add-subtask-block";
 import { refreshChildBoard } from "../refresh-child-board";
 
 async function createTaskRelation({
@@ -51,6 +52,7 @@ async function createTaskRelation({
         id: taskTable.id,
         projectId: taskTable.projectId,
         workspaceId: projectTable.workspaceId,
+        subtasksBlockParent: projectTable.subtasksBlockParent,
       })
       .from(taskTable)
       .innerJoin(projectTable, eq(taskTable.projectId, projectTable.id))
@@ -129,9 +131,14 @@ async function createTaskRelation({
       });
     }
 
-    return { relation, sourceTask, targetTask };
+    const block =
+      relationType === "subtask" && sourceTask.subtasksBlockParent
+        ? await addSubtaskBlock(tx, sourceTaskId, targetTaskId)
+        : null;
+
+    return { relation, block, sourceTask, targetTask };
   });
-  const { relation, sourceTask, targetTask } = created;
+  const { relation, block, sourceTask, targetTask } = created;
 
   await publishEvent("task-relation.created", {
     ...relation,
@@ -144,6 +151,13 @@ async function createTaskRelation({
     sourceTask.projectId,
     targetTask.projectId,
   );
+  if (block)
+    await publishEvent("task-relation.created", {
+      ...block,
+      taskId: block.sourceTaskId,
+      projectId: targetTask.projectId,
+      userId,
+    });
 
   return relation;
 }

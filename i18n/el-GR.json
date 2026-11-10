@@ -924,7 +924,9 @@
 			"moveDialogTitle": "Μετακίνηση σε άλλο χώρο εργασίας;",
 			"moveTargetLabel": "Χώρος εργασίας",
 			"moving": "Γίνεται μετακίνηση...",
-			"tasksTitle": "Εργασίες"
+			"tasksTitle": "Εργασίες",
+			"subtasksBlockParentDescription": "Linking a subtask to a task on this board also marks the subtask as blocking it. Only links made while this is on.",
+			"subtasksBlockParentTitle": "Subtasks block their parent"
 		},
 		"projectIntegrations": {
 			"pageTitle": "Ενσωματώσεις",
@@ -3416,7 +3418,9 @@
 				"blocked_by": "μπλοκάρεται από"
 			},
 			"blockedBy": "Μπλοκάρεται από",
-			"parentPlaceholder": "Ορισμός γονικής εργασίας…"
+			"parentPlaceholder": "Ορισμός γονικής εργασίας…",
+			"removeBlock": "Remove block",
+			"stillBlocks": "{{child}} still blocks {{parent}}"
 		},
 		"subtasks": {
 			"title": "Υποεργασίες",

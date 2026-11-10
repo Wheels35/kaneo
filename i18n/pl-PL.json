@@ -1763,7 +1763,9 @@
 			"moveDialogTitle": "Przenieść do innego obszaru roboczego?",
 			"moveTargetLabel": "Obszar roboczy",
 			"moving": "Przenoszenie...",
-			"tasksTitle": "Zadania"
+			"tasksTitle": "Zadania",
+			"subtasksBlockParentDescription": "Linking a subtask to a task on this board also marks the subtask as blocking it. Only links made while this is on.",
+			"subtasksBlockParentTitle": "Subtasks block their parent"
 		},
 		"projectIntegrations": {
 			"discordSectionSubtitle": "Wysyłaj aktualizacje zadań projektu na kanał Discord za pomocą webhooka.",
@@ -4093,7 +4095,9 @@
 				"related": "powiązane z"
 			},
 			"blockedBy": "Zablokowane przez",
-			"parentPlaceholder": "Ustaw zadanie nadrzędne…"
+			"parentPlaceholder": "Ustaw zadanie nadrzędne…",
+			"removeBlock": "Remove block",
+			"stillBlocks": "{{child}} still blocks {{parent}}"
 		},
 		"sort": {
 			"ascending": "Rosnąco",

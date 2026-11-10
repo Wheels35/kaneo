@@ -924,7 +924,9 @@
 			"moveDialogTitle": "Başka bir çalışma alanına taşınsın mı?",
 			"moveTargetLabel": "Çalışma alanı",
 			"moving": "Taşınıyor...",
-			"tasksTitle": "Talepler"
+			"tasksTitle": "Talepler",
+			"subtasksBlockParentDescription": "Linking a subtask to a task on this board also marks the subtask as blocking it. Only links made while this is on.",
+			"subtasksBlockParentTitle": "Subtasks block their parent"
 		},
 		"projectIntegrations": {
 			"pageTitle": "Entegrasyonlar",
@@ -3416,7 +3418,9 @@
 				"related": "ilişkilidir"
 			},
 			"blockedBy": "Engelleyen",
-			"parentPlaceholder": "Üst talebi belirle…"
+			"parentPlaceholder": "Üst talebi belirle…",
+			"removeBlock": "Remove block",
+			"stillBlocks": "{{child}} still blocks {{parent}}"
 		},
 		"subtasks": {
 			"title": "Alt talepler",

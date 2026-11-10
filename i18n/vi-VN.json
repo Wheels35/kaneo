@@ -1168,7 +1168,9 @@
 			"moveDialogTitle": "Chuyển sang không gian làm việc khác?",
 			"moveTargetLabel": "Không gian làm việc",
 			"moving": "Đang chuyển...",
-			"tasksTitle": "Công việc"
+			"tasksTitle": "Công việc",
+			"subtasksBlockParentDescription": "Linking a subtask to a task on this board also marks the subtask as blocking it. Only links made while this is on.",
+			"subtasksBlockParentTitle": "Subtasks block their parent"
 		},
 		"projectIntegrations": {
 			"pageTitle": "Tích hợp",
@@ -3362,7 +3364,9 @@
 				"related": "liên quan đến"
 			},
 			"blockedBy": "Bị chặn bởi",
-			"parentPlaceholder": "Đặt công việc cha…"
+			"parentPlaceholder": "Đặt công việc cha…",
+			"removeBlock": "Remove block",
+			"stillBlocks": "{{child}} still blocks {{parent}}"
 		},
 		"subtasks": {
 			"title": "Công việc con",

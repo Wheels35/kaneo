@@ -24,6 +24,10 @@ export const updateProjectBody = z.object({
   slug: z.string(),
   description: z.string(),
   isPublic: z.boolean(),
+  subtasksBlockParent: z.boolean().optional().openapi({
+    description:
+      "When true, linking a subtask to a task on this board also links the subtask as blocking that task, so it cannot enter a Block while blocked column until the subtask is done. Affects only links made while it is on. Omit to keep the current value.",
+  }),
 });
 
 export const reorderProjectsBody = z.object({

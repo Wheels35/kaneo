@@ -916,7 +916,9 @@
 			"moveDialogTitle": "Pindahkan ke ruang kerja lain?",
 			"moveTargetLabel": "Ruang kerja",
 			"moving": "Memindahkan...",
-			"tasksTitle": "Tugas"
+			"tasksTitle": "Tugas",
+			"subtasksBlockParentDescription": "Linking a subtask to a task on this board also marks the subtask as blocking it. Only links made while this is on.",
+			"subtasksBlockParentTitle": "Subtasks block their parent"
 		},
 		"projectIntegrations": {
 			"pageTitle": "Integrasi",
@@ -3362,7 +3364,9 @@
 				"related": "terkait dengan"
 			},
 			"blockedBy": "Diblokir oleh",
-			"parentPlaceholder": "Atur tugas induk…"
+			"parentPlaceholder": "Atur tugas induk…",
+			"removeBlock": "Remove block",
+			"stillBlocks": "{{child}} still blocks {{parent}}"
 		},
 		"subtasks": {
 			"title": "Subtugas",

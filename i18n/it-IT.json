@@ -1186,7 +1186,9 @@
 			"moveDialogTitle": "Spostare in un altro workspace?",
 			"moveTargetLabel": "Workspace",
 			"moving": "Spostamento in corso...",
-			"tasksTitle": "Attività"
+			"tasksTitle": "Attività",
+			"subtasksBlockParentDescription": "Linking a subtask to a task on this board also marks the subtask as blocking it. Only links made while this is on.",
+			"subtasksBlockParentTitle": "Subtasks block their parent"
 		},
 		"projectIntegrations": {
 			"pageTitle": "Integrazioni",
@@ -3470,7 +3472,9 @@
 				"related": "correlata a"
 			},
 			"blockedBy": "Bloccata da",
-			"parentPlaceholder": "Imposta attività principale…"
+			"parentPlaceholder": "Imposta attività principale…",
+			"removeBlock": "Remove block",
+			"stillBlocks": "{{child}} still blocks {{parent}}"
 		},
 		"subtasks": {
 			"title": "Sotto-attività",

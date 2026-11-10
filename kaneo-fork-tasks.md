@@ -41,13 +41,13 @@ Work items for [kaneo-fork-plan.md](./kaneo-fork-plan.md); design details and fi
 
 ## 5. "Subtasks block their parent" project setting
 
-- [ ] Add `subtasks_block_parent` to `projectTable`; generate the migration and inspect its SQL
-- [ ] Project API: update body, response, controller
-- [ ] `create-task-relation.ts`: add the child-blocks-parent link when the parent's board has the setting on, without duplicates
-- [ ] Project settings: switch in the Tasks section, `Project` type, fetcher, hook, i18n keys
-- [ ] Unlink notice: "still blocks" toast with "Remove block" when the web UI removes a subtask link
-- [ ] Test: `tests/api-integration/subtasks-block-parent.test.ts`; unlink notice test
-- [ ] `pnpm openapi:check:fix`
+- [x] Add `subtasks_block_parent` to `projectTable`; generate the migration and inspect its SQL
+- [x] Project API: update body, response, controller
+- [x] `create-task-relation.ts`: add the child-blocks-parent link when the parent's board has the setting on, without duplicates
+- [x] Project settings: switch in the Tasks section, `Project` type, fetcher, hook, i18n keys
+- [x] Unlink notice: "still blocks" toast with "Remove block" when the web UI removes a subtask link
+- [x] Test: `tests/api-integration/subtasks-block-parent.test.ts`; unlink notice test
+- [x] `pnpm openapi:check:fix`
 
 ## 6. Server guard
 
