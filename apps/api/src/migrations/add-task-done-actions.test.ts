@@ -1,0 +1,55 @@
+import { describe, expect, it } from "vite-plus/test";
+import { addTaskDoneActions } from "./add-task-done-actions";
+
+const parse = (value: string | null) =>
+  value === null ? null : JSON.parse(value);
+
+describe("addTaskDoneActions", () => {
+  it("lets any role that edits tasks move them to Done", () => {
+    const stored = JSON.stringify({
+      project: ["read"],
+      task: ["create", "read", "update"],
+    });
+
+    expect(parse(addTaskDoneActions("agent", stored))).toEqual({
+      project: ["read"],
+      task: ["create", "read", "update", "move_to_done"],
+    });
+  });
+
+  it.each(["admin", "owner"])("also gives %s the blocker override", (role) => {
+    const stored = JSON.stringify({ task: ["read", "update", "delete"] });
+
+    expect(parse(addTaskDoneActions(role, stored))?.task).toEqual([
+      "read",
+      "update",
+      "delete",
+      "move_to_done",
+      "override_blockers",
+    ]);
+  });
+
+  it("leaves roles that cannot edit tasks alone", () => {
+    expect(
+      addTaskDoneActions("viewer", JSON.stringify({ task: ["read"] })),
+    ).toBeNull();
+    expect(
+      addTaskDoneActions("admin", JSON.stringify({ project: ["read"] })),
+    ).toBeNull();
+  });
+
+  it("leaves rows that already have the actions alone", () => {
+    const stored = JSON.stringify({
+      task: ["update", "move_to_done", "override_blockers"],
+    });
+
+    expect(addTaskDoneActions("admin", stored)).toBeNull();
+  });
+
+  it.each(["{", "null", "[]", '"text"', JSON.stringify({ task: "update" })])(
+    "skips malformed permission %s",
+    (stored) => {
+      expect(addTaskDoneActions("member", stored)).toBeNull();
+    },
+  );
+});

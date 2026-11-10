@@ -9,7 +9,18 @@ import {
 export const statement = {
   ...defaultStatements,
   project: ["create", "read", "update", "delete", "share"],
-  task: ["create", "read", "update", "delete", "assign"],
+  // move_to_done: move a task into a final (isFinal) column.
+  // override_blockers: force a move into a "Block while blocked" column
+  // while the task's blockers are still open.
+  task: [
+    "create",
+    "read",
+    "update",
+    "delete",
+    "assign",
+    "move_to_done",
+    "override_blockers",
+  ],
   label: ["create", "read", "update", "delete"],
   workspace: ["read", "update", "delete", "manage_settings"],
 } as const;
@@ -27,7 +38,7 @@ export const viewer = ac.newRole({
 export const member = ac.newRole({
   ...memberAc.statements,
   project: ["create", "read"],
-  task: ["create", "read", "update"],
+  task: ["create", "read", "update", "move_to_done"],
   label: ["create", "read", "update", "delete"],
   workspace: ["read"],
 });
@@ -35,7 +46,15 @@ export const member = ac.newRole({
 export const admin = ac.newRole({
   ...adminAc.statements,
   project: ["create", "read", "update", "delete", "share"],
-  task: ["create", "read", "update", "delete", "assign"],
+  task: [
+    "create",
+    "read",
+    "update",
+    "delete",
+    "assign",
+    "move_to_done",
+    "override_blockers",
+  ],
   label: ["create", "read", "update", "delete"],
   workspace: ["read", "update", "manage_settings"],
 });
@@ -43,7 +62,15 @@ export const admin = ac.newRole({
 export const owner = ac.newRole({
   ...ownerAc.statements,
   project: ["create", "read", "update", "delete", "share"],
-  task: ["create", "read", "update", "delete", "assign"],
+  task: [
+    "create",
+    "read",
+    "update",
+    "delete",
+    "assign",
+    "move_to_done",
+    "override_blockers",
+  ],
   label: ["create", "read", "update", "delete"],
   workspace: ["read", "update", "delete", "manage_settings"],
 });

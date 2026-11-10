@@ -26,6 +26,8 @@ describe("@kaneo/permissions statement surface", () => {
       "update",
       "delete",
       "assign",
+      "move_to_done",
+      "override_blockers",
     ]);
     expect(statement.label).toEqual(["create", "read", "update", "delete"]);
     expect(statement.workspace).toEqual([
@@ -83,6 +85,17 @@ describe("built-in role privileges", () => {
     expect(owner.statements.workspace).toEqual(
       expect.arrayContaining(["read", "update", "delete", "manage_settings"]),
     );
+  });
+
+  it("lets members finish tasks but only admins and owners override blockers", () => {
+    expect(viewer.statements.task).not.toContain("move_to_done");
+    expect(member.statements.task).toContain("move_to_done");
+    expect(member.statements.task).not.toContain("override_blockers");
+    for (const role of [admin, owner]) {
+      expect(role.statements.task).toEqual(
+        expect.arrayContaining(["move_to_done", "override_blockers"]),
+      );
+    }
   });
 
   it("groups all four roles under builtInRoles by name", () => {

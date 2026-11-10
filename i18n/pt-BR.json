@@ -963,6 +963,14 @@
 					"assign": {
 						"label": "Atribuir",
 						"description": "Pode atribuir tarefas a membros"
+					},
+					"move_to_done": {
+						"description": "Can move tasks into a final column",
+						"label": "Move to Done"
+					},
+					"override_blockers": {
+						"description": "Can move a task past open blocking tasks after a warning",
+						"label": "Override blockers"
 					}
 				},
 				"label": {

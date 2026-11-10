@@ -26,11 +26,11 @@ Work items for [kaneo-fork-plan.md](./kaneo-fork-plan.md); design details and fi
 
 ## 3. Permissions and backfill
 
-- [ ] Add `move_to_done` and `override_blockers` to `task` in `packages/permissions/src/index.ts`; grant `move_to_done` to member, both to admin and owner
-- [ ] Update `packages/permissions/src/index.test.ts`
-- [ ] Add the one-time migration `apps/api/src/migrations/task-done-permissions-migration.ts` and run it at boot
-- [ ] Test: `tests/api-integration/task-done-permissions-migration.test.ts`
-- [ ] Roles editor: `PERMISSION_LABELS` entries and i18n keys; run `pnpm i18n:check:fix`
+- [x] Add `move_to_done` and `override_blockers` to `task` in `packages/permissions/src/index.ts`; grant `move_to_done` to member, both to admin and owner
+- [x] Update `packages/permissions/src/index.test.ts`
+- [x] Add the one-time migration `apps/api/src/migrations/task-done-permissions-migration.ts` and run it at boot
+- [x] Test: `tests/api-integration/task-done-permissions-migration.test.ts`
+- [x] Roles editor: `PERMISSION_LABELS` entries and i18n keys; run `pnpm i18n:check:fix`
 
 ## 4. "Block while blocked" column switch
 

@@ -173,6 +173,16 @@ const PERMISSION_LABELS: Record<
     label: "Assign tasks",
     description: "Assign tasks to other workspace members.",
   },
+  "task:move_to_done": {
+    label: "Move tasks to Done",
+    description:
+      "Move tasks into a final column. Without it, tasks stop at a column before Done, such as one for validation.",
+  },
+  "task:override_blockers": {
+    label: "Override blockers",
+    description:
+      'Move a task into a "Block while blocked" column while its blocking tasks are still open, after a warning.',
+  },
   "label:create": {
     label: "Create labels",
     description: "Add new labels to tasks in this workspace.",

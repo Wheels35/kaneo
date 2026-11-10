@@ -945,6 +945,14 @@
 					"assign": {
 						"label": "指派",
 						"description": "可以將任務指派給成員"
+					},
+					"move_to_done": {
+						"description": "Can move tasks into a final column",
+						"label": "Move to Done"
+					},
+					"override_blockers": {
+						"description": "Can move a task past open blocking tasks after a warning",
+						"label": "Override blockers"
 					}
 				},
 				"label": {

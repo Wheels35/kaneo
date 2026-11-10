@@ -1384,6 +1384,14 @@
 					"assign": {
 						"label": "Assign",
 						"description": "Can assign tasks to members"
+					},
+					"move_to_done": {
+						"label": "Move to Done",
+						"description": "Can move tasks into a final column"
+					},
+					"override_blockers": {
+						"label": "Override blockers",
+						"description": "Can move a task past open blocking tasks after a warning"
 					}
 				},
 				"label": {

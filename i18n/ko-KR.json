@@ -1338,6 +1338,14 @@
 					"assign": {
 						"label": "할당",
 						"description": "멤버에게 작업을 할당할 수 있습니다"
+					},
+					"move_to_done": {
+						"description": "Can move tasks into a final column",
+						"label": "Move to Done"
+					},
+					"override_blockers": {
+						"description": "Can move a task past open blocking tasks after a warning",
+						"label": "Override blockers"
 					}
 				},
 				"label": {
