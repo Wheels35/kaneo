@@ -183,6 +183,11 @@ const PERMISSION_LABELS: Record<
     description:
       'Move a task into a "Block while blocked" column while its blocking tasks are still open, after a warning.',
   },
+  "task:remove_blockers": {
+    label: "Remove blockers",
+    description:
+      'Delete a "blocks" link between tasks. Adding one needs only Update tasks.',
+  },
   "label:create": {
     label: "Create labels",
     description: "Add new labels to tasks in this workspace.",

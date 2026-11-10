@@ -1392,6 +1392,10 @@
 					"override_blockers": {
 						"label": "Override blockers",
 						"description": "Can move a task past open blocking tasks after a warning"
+					},
+					"remove_blockers": {
+						"label": "Remove blockers",
+						"description": "Can delete a link that marks one task as blocking another"
 					}
 				},
 				"label": {

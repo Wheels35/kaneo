@@ -12,6 +12,7 @@ export const statement = {
   // move_to_done: move a task into a final (isFinal) column.
   // override_blockers: force a move into a "Block while blocked" column
   // while the task's blockers are still open.
+  // remove_blockers: delete a "blocks" link. Creating one needs only update.
   task: [
     "create",
     "read",
@@ -20,6 +21,7 @@ export const statement = {
     "assign",
     "move_to_done",
     "override_blockers",
+    "remove_blockers",
   ],
   label: ["create", "read", "update", "delete"],
   workspace: ["read", "update", "delete", "manage_settings"],
@@ -38,7 +40,7 @@ export const viewer = ac.newRole({
 export const member = ac.newRole({
   ...memberAc.statements,
   project: ["create", "read"],
-  task: ["create", "read", "update", "move_to_done"],
+  task: ["create", "read", "update", "move_to_done", "remove_blockers"],
   label: ["create", "read", "update", "delete"],
   workspace: ["read"],
 });
@@ -54,6 +56,7 @@ export const admin = ac.newRole({
     "assign",
     "move_to_done",
     "override_blockers",
+    "remove_blockers",
   ],
   label: ["create", "read", "update", "delete"],
   workspace: ["read", "update", "manage_settings"],
@@ -70,6 +73,7 @@ export const owner = ac.newRole({
     "assign",
     "move_to_done",
     "override_blockers",
+    "remove_blockers",
   ],
   label: ["create", "read", "update", "delete"],
   workspace: ["read", "update", "delete", "manage_settings"],

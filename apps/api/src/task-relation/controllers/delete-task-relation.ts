@@ -6,6 +6,7 @@ import {
   taskRelationTable,
   taskTable,
 } from "../../database/schema";
+import { ApiError } from "../../errors/api-error";
 import { publishEvent } from "../../events";
 import { projectAccessCondition } from "../../project-access/project-access-condition";
 import { refreshChildBoard } from "../refresh-child-board";
@@ -14,6 +15,8 @@ async function deleteTaskRelation(
   id: string,
   userId: string,
   workspaceId: string,
+  // Asked only when the link is a "blocks" link.
+  canRemoveBlockers: () => Promise<boolean> = async () => false,
 ) {
   const workspaceTasks = db
     .select({ id: taskTable.id })
@@ -26,24 +29,35 @@ async function deleteTaskRelation(
       ),
     );
 
-  // Check both endpoints in the delete statement itself. Legacy cross-tenant
-  // rows must not bypass the same boundary enforced on creation and reads.
+  // Check both endpoints in every statement. Legacy cross-tenant rows must
+  // not bypass the same boundary enforced on creation and reads.
+  const inWorkspace = and(
+    eq(taskRelationTable.id, id),
+    inArray(taskRelationTable.sourceTaskId, workspaceTasks),
+    inArray(taskRelationTable.targetTaskId, workspaceTasks),
+  );
+  const notFound = () =>
+    new HTTPException(404, { message: "Task relation not found" });
+
+  // A link's type never changes, so checking it before the delete is safe.
+  const [existing] = await db
+    .select({ relationType: taskRelationTable.relationType })
+    .from(taskRelationTable)
+    .where(inWorkspace);
+  if (!existing) throw notFound();
+  if (existing.relationType === "blocks" && !(await canRemoveBlockers()))
+    throw new ApiError(403, {
+      message:
+        "Removing a blocks link needs the Remove blockers permission. Finish the blocking task instead.",
+      code: "MISSING_PERMISSION",
+      missingPermissions: ["task:remove_blockers"],
+    });
+
   const [relation] = await db
     .delete(taskRelationTable)
-    .where(
-      and(
-        eq(taskRelationTable.id, id),
-        inArray(taskRelationTable.sourceTaskId, workspaceTasks),
-        inArray(taskRelationTable.targetTaskId, workspaceTasks),
-      ),
-    )
+    .where(inWorkspace)
     .returning();
-
-  if (!relation) {
-    throw new HTTPException(404, {
-      message: "Task relation not found",
-    });
-  }
+  if (!relation) throw notFound();
 
   const tasks = await db
     .select({ id: taskTable.id, projectId: taskTable.projectId })

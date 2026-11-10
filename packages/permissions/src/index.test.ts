@@ -28,6 +28,7 @@ describe("@kaneo/permissions statement surface", () => {
       "assign",
       "move_to_done",
       "override_blockers",
+      "remove_blockers",
     ]);
     expect(statement.label).toEqual(["create", "read", "update", "delete"]);
     expect(statement.workspace).toEqual([
@@ -95,6 +96,13 @@ describe("built-in role privileges", () => {
       expect(role.statements.task).toEqual(
         expect.arrayContaining(["move_to_done", "override_blockers"]),
       );
+    }
+  });
+
+  it("lets every role that edits tasks remove blockers by default", () => {
+    expect(viewer.statements.task).not.toContain("remove_blockers");
+    for (const role of [member, admin, owner]) {
+      expect(role.statements.task).toContain("remove_blockers");
     }
   });
 

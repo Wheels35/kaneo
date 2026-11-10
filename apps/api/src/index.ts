@@ -63,6 +63,7 @@ import label from "./label";
 import mattermostIntegration from "./mattermost-integration";
 import mcpRoutes, { mcpWellKnownRoutes } from "./mcp";
 import { migrateColumns } from "./migrations/column-migration";
+import { migrateRemoveBlockersPermission } from "./migrations/remove-blockers-permission-migration";
 import { migrateTaskDonePermissions } from "./migrations/task-done-permissions-migration";
 import notification from "./notification";
 import notificationPreferences from "./notification-preferences";
@@ -1052,6 +1053,7 @@ export async function runStartupTasks() {
   await migrateColumns();
   await seedDefaultWorkspaceRoles();
   await migrateTaskDonePermissions();
+  await migrateRemoveBlockersPermission();
 
   initializePlugins();
   initializeScheduler();

@@ -14,6 +14,7 @@ Problems:
 - **Rule 1, role permission "Move to Done"** (`task:move_to_done`). A role without it can never move a task into a final (`isFinal`) column. Agents go to "For validation" instead. Not overridable.
 - **Rule 2, column switch "Block while blocked"** (`column.blockWhileBlocked`). A task can't enter a column with the switch on while it has unfinished "blocked by" tasks. **Off everywhere by default**; the user turns it on per column (e.g. For validation, Done). Subtasks don't block by themselves (2026-11-09: "this just allows us to separate subtasks from blocking"). The user approved this and the renames below with "yep perfect"; the names themselves are Claude's.
 - **Rule 2 override, role permission "Override blockers"** (`task:override_blockers`, admin and owner by default). The server rejects with a warning listing the open blockers; a role with the permission can retry with `force=true`. The web UI turns this into a confirm dialog.
+- **Role permission "Remove blockers"** (`task:remove_blockers`, 2026-11-10): "the blocks link should have a delete permissions created then", and "i want it to be able to be created, but deleted is what i want to change". Deleting a `blocks` link needs it; creating one still needs only task editing. It stops an agent from deleting a block and then moving the task. The name is Claude's. The defaults are Claude's choice and weren't discussed: member, admin and owner have it, and a migration gives it to every stored role that can edit tasks, so nothing changes on upgrade. It is switched off per role in the roles editor.
 - **Project setting "Subtasks block their parent"** (2026-11-09; the name is Claude's). When it is on for the parent's board ("always the parents board"), linking a subtask also creates a `blocks` link from the child to the parent ("a parent being blocked by its children"). Only links made after it is turned on ("only new").
 - **Unlinking a subtask keeps its `blocks` link.** The web UI then shows a notice offering "Remove block". Chosen 2026-11-09 ("B works for me") over removing it with an undo.
 - Agents log in as **their own Kaneo user** with an agent role; API keys are created as that user.
@@ -58,7 +59,7 @@ The bug was in `apps/web/src/components/task/task-details-content.tsx`: the key 
   - Update rows in place. Never insert: duplicate rows OR together in `rolesAllow`.
   - Call it at boot in `apps/api/src/index.ts`, next to `seedDefaultWorkspaceRoles` (~1052).
   - Why it's needed: the seed only inserts missing rows, and a stored row fully replaces the built-in role (`role-permissions.ts:59-67`). Owner is static, so it picks the change up from the package.
-  - Result: nobody loses anything on upgrade. You then create the agent role with both switches off.
+  - Result: nobody loses anything on upgrade. You then create the agent role with both switches off (and Remove blockers off, from step 6b).
 - Roles editor (`apps/web/src/routes/_layout/_authenticated/dashboard/settings/workspace/roles.tsx`): the switches appear automatically from `statement`. Add entries to `PERMISSION_LABELS`, and add the i18n keys `settings.workspaceRoles.permissions.task.{move_to_done,override_blockers}.{label,description}` in `i18n/en-US.json`. Then run `pnpm i18n:check:fix` to fill the other 20 locales. (`pnpm i18n:schema` regenerates a file upstream leaves far out of date and nothing reads; leave it out of this branch unless asked.)
 - Not changed: scoped API keys. The UI only creates unscoped keys, and agents use their own user. Instance admins bypass role checks (`hasWorkspacePermission`), so an agent user must never be an instance admin.
 
@@ -116,6 +117,14 @@ Call sites. Each runs inside its transaction against the locked before-row, and 
 - Update route descriptions, run `pnpm openapi:check:fix`, and commit `apps/docs/openapi.json`.
 - MCP is covered automatically: both MCP servers call these REST routes over HTTP (`apps/api/src/mcp/tools.ts`, `packages/mcp/src/kaneo/client.ts`). No `force` parameter is added to the MCP tools.
 
+## Step 6b: "Remove blockers" permission — done
+
+- `packages/permissions`: `task` gains `"remove_blockers"`; member, admin and owner get it. New capability `removeBlockers`.
+- Migration: `migrations/remove-blockers-permission-migration.ts`, marker `remove-blockers-permission-v1`, adds `remove_blockers` to every stored role whose `task` includes `update`. Step 3's migration now shares `update-stored-roles.ts` (lock, marker, row loop) and `add-task-actions.ts` with it. Called at boot after step 3's.
+- `task-relation/controllers/delete-task-relation.ts`: reads the link's type first (a link's type never changes); a `blocks` link without the permission gets a **403** `MISSING_PERMISSION` with `missingPermissions: ["task:remove_blockers"]`. The check is skipped for other link types. Route description and 403 updated.
+- Web: the roles editor label and i18n keys. In task details, "Remove relation" is hidden on blocks/blocked-by links for roles without it. Step 5's unlink notice still appears for them, without its "Remove block" button.
+- Not changed: deleting the blocking task itself still removes the link through the cascade. That needs `task:delete`, which the agent role shouldn't have.
+
 ## Step 7: Web dialog and force retry
 
 - `apps/web/src/lib/parse-api-error-body.ts` and `lib/http-error.ts`: carry `overridable` and `blockers`. Add `lib/is-open-blockers-error.ts`, modeled on `is-workspace-archived-error.ts`.
@@ -139,7 +148,7 @@ Call sites. Each runs inside its transaction against the locked before-row, and 
 
 - Forced moves: pass `forcedOpenBlockers: N` through the `task.status_changed` payload (`task-mutation-effects.ts:72-82`) into `eventData` (`apps/api/src/activity/index.ts:288`). Render "moved to Done with N open blockers" in `apps/web/src/components/activity/index.tsx`.
 - Docs:
-  - `apps/docs/core/functional/collaborate-with-team.mdx`: add the two permissions to the role table and a short "agent role" setup section (custom role, both switches off, no `project:update`, own user and key).
+  - `apps/docs/core/functional/collaborate-with-team.mdx`: add the three permissions to the role table and a short "agent role" setup section (custom role with Move to Done, Override blockers and Remove blockers off, no `project:update` or `task:delete`, own user and key).
   - Document the "Block while blocked" column switch and the "Subtasks block their parent" project setting where columns and project settings are described.
   - `apps/docs/api-reference/errors.mdx`: document `OPEN_BLOCKERS`, `overridable`, `blockers` and `force`.
 
@@ -168,7 +177,7 @@ A one-off command that adds the `blocks` link to existing subtask links on chose
 
 ### Still open
 
-- Deleting a relation needs only `task:update`, which the agent role keeps. An agent could delete a `blocks` link and then move the parent into a gated column such as For validation. Done stays protected by Rule 1. The subtask-based design had the same exposure through deleting the subtask link. Not discussed yet.
+- Duplicating a subtask copies its parent link straight into `task_relation` (`duplicate-task.ts`), not through `create-task-relation`, so the copy gets no `blocks` link even when the parent's board has "Subtasks block their parent" on. Found by Claude while building step 6; raised with the user, not decided.
 
 ---
 
@@ -184,6 +193,7 @@ A one-off command that adds the `blocks` link to existing subtask links on chose
 - Integration tests (real Postgres `_test` database, `pnpm test:integration`):
   - `tests/api-integration/task-parent.test.ts`. Covers a cross-project parent, the board view, the oldest link, an archived board, a parent hidden by project access, cross-workspace isolation, public boards, and the child-board refresh.
   - `tests/api-integration/task-done-permissions-migration.test.ts`. Pattern: `column-migration-once.test.ts`. Existing member, admin and custom rows gain the actions, it runs only once, and an action removed after the migration stays removed.
+  - `tests/api-integration/remove-blockers-permission.test.ts`: without the permission a `blocks` link can be added but not deleted (403, link kept), related links still delete, members can delete; the migration adds the action to roles that edit tasks and runs once.
   - `tests/api-integration/subtasks-block-parent.test.ts`: setting on for the parent's board → linking a subtask adds the `blocks` link, also across boards; setting off → no link; the child's board setting doesn't count; an existing `blocks` link in either direction isn't duplicated; unlinking leaves the `blocks` link.
   - `tests/api-integration/task-status-guard.test.ts`, over HTTP with role rows. Pattern: `workspace-rbac.test.ts` plus the `relate` helper.
     - Agent role → Done: 403. Agent → For validation: 200.
@@ -208,6 +218,6 @@ A one-off command that adds the `blocks` link to existing subtask links on chose
 - With "Subtasks block their parent" on for the Project board, link a phase task: the phase card shows it under "Blocked by". Swap the parent: the "still blocks" notice appears and "Remove block" works.
 - Drag a blocked card into a gated column: the dialog appears, "Move anyway" works as admin, and an activity entry is written.
 - Then, on a real instance:
-  1. Create an Agent role with both switches off.
+  1. Create an Agent role with Move to Done, Override blockers and Remove blockers off.
   2. Create an agent user with that role and give it an API key.
   3. `curl -X PUT /api/task/status/{id}` with the agent key: 403 into Done, 200 into For validation, 409 when the card has open blockers.

@@ -60,6 +60,7 @@ export function useWorkspacePermission() {
       canUpdateTasks: () => can.updateTasks,
       canCreateTasks: () => can.createTasks,
       canDeleteTasks: () => can.deleteTasks,
+      canRemoveBlockers: () => can.removeBlockers,
       canAssignTasks: () => can.assignTasks,
       canCreateLabels: () => can.createLabels,
       canUpdateLabels: () => can.updateLabels,

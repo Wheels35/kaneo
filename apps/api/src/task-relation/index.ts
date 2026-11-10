@@ -11,7 +11,10 @@ import {
   jsonResponse,
 } from "../openapi";
 import { assertProjectAccess } from "../project-access/assert-project-access";
-import { requireWorkspacePermission } from "../utils/require-workspace-permission";
+import {
+  hasWorkspacePermission,
+  requireWorkspacePermission,
+} from "../utils/require-workspace-permission";
 import { validateWorkspaceAccess } from "../utils/validate-workspace-access";
 import { workspaceAccess } from "../utils/workspace-access-middleware";
 import createTaskRelation from "./controllers/create-task-relation";
@@ -187,7 +190,8 @@ const deleteTaskRelationRoute = createRoute({
   path: "/{id}",
   tags: ["Task Relations"],
   summary: "Delete task relation",
-  description: "Remove a link between two tasks. Returns the deleted relation.",
+  description:
+    "Remove a link between two tasks. Returns the deleted relation. Removing a blocks link also needs task:remove_blockers; creating one needs only task:update.",
   middleware: [
     scopeToRelation,
     requireWorkspacePermission({ task: ["update"] }),
@@ -196,7 +200,7 @@ const deleteTaskRelationRoute = createRoute({
   responses: {
     200: jsonResponse("The deleted relation", taskRelationSchema),
     403: errorResponse(
-      "No access to the project, or missing task:update permission",
+      "No access to the project, or missing task:update, or task:remove_blockers for a blocks link",
     ),
     404: errorResponse("Task relation not found, or its source task is gone"),
   },
@@ -236,6 +240,7 @@ const taskRelation = apiRouter<BaseVariables & { workspaceId: string }>()
         c.req.valid("param").id,
         c.get("userId"),
         c.get("workspaceId"),
+        () => hasWorkspacePermission(c, { task: ["remove_blockers"] }),
       ),
       200,
     ),

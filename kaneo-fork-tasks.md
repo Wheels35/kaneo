@@ -60,6 +60,14 @@ Work items for [kaneo-fork-plan.md](./kaneo-fork-plan.md); design details and fi
 - [x] Test: 409 `message` reaches MCP tool results in `tests/api/mcp-tools.test.ts`
 - [x] Update route descriptions; `pnpm openapi:check:fix`
 
+## 6b. Remove blockers permission
+
+- [x] Add `task:remove_blockers` (member, admin, owner) and the `removeBlockers` capability
+- [x] Migration for stored roles that edit tasks; share the stored-role runner with step 3's migration
+- [x] Require it in `delete-task-relation` for `blocks` links only
+- [x] Roles editor label and i18n keys; hide "Remove relation" on block links and the notice's "Remove block" button for roles without it
+- [x] Test: `tests/api-integration/remove-blockers-permission.test.ts`, `add-task-actions.test.ts`, permissions `index.test.ts`, the unlink notice test
+
 ## 7. Web dialog and force retry
 
 - [ ] Carry `overridable` and `blockers` in `parse-api-error-body.ts` and `http-error.ts`; add `is-open-blockers-error.ts`
@@ -82,4 +90,4 @@ Work items for [kaneo-fork-plan.md](./kaneo-fork-plan.md); design details and fi
 - [ ] `pnpm build:dependencies`, `pnpm typecheck`, `pnpm lint`, `pnpm openapi:check`, `pnpm i18n:check`
 - [ ] `pnpm test` and `pnpm test:integration`
 - [ ] Browser check in `pnpm dev`: parent line, detail link, auto block link and unlink notice, gated drag with the dialog, activity entry
-- [ ] Real instance: create the Agent role (both switches off), an agent user and key, then curl a status move (403 into Done, 200 into For validation, 409 with open blockers)
+- [ ] Real instance: create the Agent role (Move to Done, Override blockers and Remove blockers off), an agent user and key, then curl a status move (403 into Done, 200 into For validation, 409 with open blockers)

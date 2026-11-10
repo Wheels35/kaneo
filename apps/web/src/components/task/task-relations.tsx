@@ -104,7 +104,7 @@ export default function TaskRelations({
   );
   const createRelation = useCreateTaskRelation();
   const deleteRelation = useDeleteTaskRelation(taskId);
-  const { canUpdateTasks } = useWorkspacePermission();
+  const { canUpdateTasks, canRemoveBlockers } = useWorkspacePermission();
   const canEdit = canUpdateTasks();
   const displayIdOf = useProjectSlugs(workspaceId);
   const offerBlockRemoval = useOfferBlockRemoval(taskId, workspaceId);
@@ -330,17 +330,18 @@ export default function TaskRelations({
                   <ContextMenuItem onClick={() => openTask(item.task)}>
                     <span>{t("tasks:relations.openTask")}</span>
                   </ContextMenuItem>
-                  {canEdit && (
-                    <>
-                      <ContextMenuSeparator />
-                      <ContextMenuItem
-                        className="text-destructive"
-                        onClick={() => handleRemoveRelation(item.id)}
-                      >
-                        <span>{t("tasks:relations.removeRelation")}</span>
-                      </ContextMenuItem>
-                    </>
-                  )}
+                  {canEdit &&
+                    (item.kind === "related" || canRemoveBlockers()) && (
+                      <>
+                        <ContextMenuSeparator />
+                        <ContextMenuItem
+                          className="text-destructive"
+                          onClick={() => handleRemoveRelation(item.id)}
+                        >
+                          <span>{t("tasks:relations.removeRelation")}</span>
+                        </ContextMenuItem>
+                      </>
+                    )}
                 </ContextMenuContent>
               </ContextMenu>
             );

@@ -4741,6 +4741,9 @@
           "assignTasks": {
             "type": "boolean"
           },
+          "removeBlockers": {
+            "type": "boolean"
+          },
           "createLabels": {
             "type": "boolean"
           },
@@ -4782,6 +4785,7 @@
           "createTasks",
           "deleteTasks",
           "assignTasks",
+          "removeBlockers",
           "createLabels",
           "updateLabels",
           "deleteLabels",
@@ -23106,7 +23110,7 @@
           "Task Relations"
         ],
         "summary": "Delete task relation",
-        "description": "Remove a link between two tasks. Returns the deleted relation.",
+        "description": "Remove a link between two tasks. Returns the deleted relation. Removing a blocks link also needs task:remove_blockers; creating one needs only task:update.",
         "parameters": [
           {
             "schema": {
@@ -23139,7 +23143,7 @@
             }
           },
           "403": {
-            "description": "No access to the project, or missing task:update permission",
+            "description": "No access to the project, or missing task:update, or task:remove_blockers for a blocks link",
             "content": {
               "application/json": {
                 "schema": {

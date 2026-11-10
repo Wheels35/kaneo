@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   info: vi.fn(),
   deleteRelation: vi.fn(),
   relations: [] as unknown[],
+  canRemoveBlockers: true,
 }));
 
 vi.mock("react-i18next", () => ({
@@ -21,6 +22,11 @@ vi.mock("@/hooks/queries/task-relation/use-get-task-relations", () => ({
 vi.mock("@/hooks/mutations/task-relation/use-delete-task-relation", () => ({
   default: () => ({ mutate: mocks.deleteRelation }),
 }));
+vi.mock("@/hooks/use-workspace-permission", () => ({
+  useWorkspacePermission: () => ({
+    canRemoveBlockers: () => mocks.canRemoveBlockers,
+  }),
+}));
 vi.mock("@/hooks/queries/project/use-get-projects", () => ({
   default: () => ({
     data: [
@@ -33,7 +39,19 @@ vi.mock("@/hooks/queries/project/use-get-projects", () => ({
 const child = { title: "Parser", projectId: "phase", number: 3 };
 const parent = { title: "Build phase", projectId: "plan", number: 5 };
 
-afterEach(() => vi.clearAllMocks());
+afterEach(() => {
+  vi.clearAllMocks();
+  mocks.canRemoveBlockers = true;
+});
+
+const childBlocksParent = {
+  id: "block-1",
+  relationType: "blocks",
+  sourceTaskId: "child",
+  targetTaskId: "parent",
+  sourceTask: { title: "Parser", projectId: "phase", number: 3 },
+  targetTask: { title: "Build phase", projectId: "plan", number: 5 },
+};
 
 describe("useOfferBlockRemoval", () => {
   it("offers to remove the block the child still has on its old parent", () => {
@@ -62,6 +80,19 @@ describe("useOfferBlockRemoval", () => {
     );
     mocks.info.mock.calls[0][1].action.onClick();
     expect(mocks.deleteRelation).toHaveBeenCalledWith("block-1");
+  });
+
+  it("only reports the block to a role without Remove blockers", () => {
+    mocks.relations = [childBlocksParent];
+    mocks.canRemoveBlockers = false;
+    const { result } = renderHook(() => useOfferBlockRemoval("child", "ws"));
+
+    result.current("parent");
+
+    expect(mocks.info).toHaveBeenCalledWith(
+      'tasks:relations.stillBlocks {"child":"BUILD-3","parent":"PLAN-5"}',
+      undefined,
+    );
   });
 
   it("stays quiet when the child does not block that parent", () => {
