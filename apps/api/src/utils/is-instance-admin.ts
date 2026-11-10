@@ -6,7 +6,10 @@ import { hasInstanceAdminRole } from "./instance-admin-role";
 
 export { hasInstanceAdminRole };
 
-export async function isInstanceAdmin(c: Context): Promise<boolean> {
+export async function isInstanceAdmin(
+  c: Context,
+  database: Pick<typeof db, "select"> = db,
+): Promise<boolean> {
   const user = c.get("user") as { role?: string | null } | null | undefined;
   if (user?.role) {
     return hasInstanceAdminRole(user.role);
@@ -15,7 +18,7 @@ export async function isInstanceAdmin(c: Context): Promise<boolean> {
   const userId = c.get("userId");
   if (!userId) return false;
 
-  const [row] = await db
+  const [row] = await database
     .select({ role: userTable.role })
     .from(userTable)
     .where(eq(userTable.id, userId))

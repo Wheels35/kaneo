@@ -12,6 +12,8 @@ import {
   getProjectWorkspaceId,
 } from "../../utils/assert-assignable-user";
 import { boardDescription, descriptionDeferred } from "../description-pages";
+import { assertStatusMoves } from "../status-guard/assert-status-moves";
+import type { StatusGuard } from "../status-guard/status-guard";
 import { assertValidTaskStatus } from "../validate-task-fields";
 import { assertTaskPosition } from "./next-task-position";
 
@@ -27,6 +29,7 @@ async function updateTask(
   position: number,
   userId?: string,
   currentUserId?: string,
+  guard?: StatusGuard,
 ) {
   assertTaskPosition(position);
 
@@ -135,13 +138,19 @@ async function updateTask(
         description: boardDescription,
         descriptionDeferred,
       });
-    if (task)
+    if (task) {
+      await assertStatusMoves(
+        tx,
+        [{ taskId: id, from: locked, to: task }],
+        guard,
+      );
       await recordTaskMutation(
         tx,
         existingTask,
         { title, dueDate: dueDate ?? null },
         currentUserId,
       );
+    }
     return task;
   });
 

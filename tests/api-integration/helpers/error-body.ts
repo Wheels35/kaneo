@@ -5,6 +5,13 @@ export type ApiErrorBody = {
   code: string;
   issues?: Array<{ path: string; message: string }>;
   missingPermissions?: string[];
+  overridable?: boolean;
+  blockers?: Array<{
+    taskId: string;
+    id: string | null;
+    key: string | null;
+    title: string | null;
+  }>;
 };
 
 export async function readErrorBody(response: Response) {

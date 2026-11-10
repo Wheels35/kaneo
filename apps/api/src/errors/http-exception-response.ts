@@ -32,6 +32,10 @@ function errorBody(
       ...(error.missingPermissions
         ? { missingPermissions: error.missingPermissions }
         : {}),
+      ...(error.overridable === undefined
+        ? {}
+        : { overridable: error.overridable }),
+      ...(error.blockers ? { blockers: error.blockers } : {}),
     };
   }
   return {

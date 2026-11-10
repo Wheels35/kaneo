@@ -10,6 +10,7 @@ type UpdateTaskPriority = InferRequestType<
 async function updateTask(taskId: string, task: Task) {
   const response = await client.task[":id"].$put({
     param: { id: taskId },
+    query: {},
     json: {
       userId: task.userId || "",
       title: task.title,

@@ -23,6 +23,8 @@ import {
   getProjectWorkspaceId,
 } from "../../utils/assert-assignable-user";
 import type { TaskRecurrence } from "../recurrence/schema";
+import { assertStatusMoves } from "../status-guard/assert-status-moves";
+import type { StatusGuard } from "../status-guard/status-guard";
 import {
   assertRequiredCustomFields,
   assertValidTaskStatus,
@@ -65,6 +67,7 @@ async function createTask({
   recurrence,
   customFields,
   draftAssetIds,
+  guard,
 }: {
   projectId: string;
   currentUserId: string;
@@ -78,6 +81,7 @@ async function createTask({
   recurrence?: TaskRecurrence;
   customFields?: CustomFieldInput[];
   draftAssetIds?: string[];
+  guard?: StatusGuard;
 }) {
   const resolvedStatus = status || "to-do";
   const resolvedPriority = priority || "no-priority";
@@ -86,6 +90,11 @@ async function createTask({
   const normalizedUserId = userId?.trim() || undefined;
 
   await assertValidTaskStatus(resolvedStatus, projectId);
+  await assertStatusMoves(
+    db,
+    [{ to: { projectId, status: resolvedStatus } }],
+    guard,
+  );
 
   const allFields = await db
     .select()

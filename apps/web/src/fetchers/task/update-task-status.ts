@@ -7,6 +7,7 @@ type UpdateTaskStatusPayload = Pick<Task, "status">;
 async function updateTaskStatus(taskId: string, task: UpdateTaskStatusPayload) {
   const response = await client.task.status[":id"].$put({
     param: { id: taskId },
+    query: {},
     json: {
       status: task.status || "",
     },

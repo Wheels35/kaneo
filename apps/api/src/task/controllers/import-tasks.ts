@@ -10,6 +10,8 @@ import {
 } from "../../utils/assert-assignable-user";
 import { coercePriority, VIRTUAL_STATUSES } from "../validate-task-fields";
 import { resolveImportTaskStatus } from "../resolve-import-task-status";
+import { assertStatusMoves } from "../status-guard/assert-status-moves";
+import type { StatusGuard } from "../status-guard/status-guard";
 import { claimTaskNumber } from "./claim-task-numbers";
 import { nextTaskPosition } from "./next-task-position";
 import { resolveImportAssignees } from "../resolve-import-assignees";
@@ -28,6 +30,7 @@ async function importTasks(
   projectId: string,
   tasksToImport: ImportTask[],
   currentUserId?: string,
+  guard?: StatusGuard,
 ) {
   const project = await db.query.projectTable.findFirst({
     where: eq(projectTable.id, projectId),
@@ -60,6 +63,18 @@ async function importTasks(
     where: eq(columnTable.projectId, projectId),
     orderBy: asc(columnTable.position),
   });
+
+  // Checked for the whole import up front, so a refused import creates nothing.
+  await assertStatusMoves(
+    db,
+    tasksToImport.flatMap((task) => {
+      const resolved = resolveImportTaskStatus(task.status, columns);
+      return "error" in resolved
+        ? []
+        : [{ to: { projectId, status: resolved.status } }];
+    }),
+    guard,
+  );
 
   const results = [];
 

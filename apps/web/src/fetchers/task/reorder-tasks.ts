@@ -7,7 +7,7 @@ export type TaskReorder = {
   tasks: { id: string; position: number; status?: string }[];
 };
 export default async function reorderTasks(json: TaskReorder) {
-  const response = await client.task.reorder.$post({ json });
+  const response = await client.task.reorder.$post({ query: {}, json });
   if (!response.ok) throw await HttpError.fromResponse(response);
   return response.json();
 }

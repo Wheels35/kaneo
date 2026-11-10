@@ -81,6 +81,16 @@ The bug was in `apps/web/src/components/task/task-details-content.tsx`: the key 
 
 ## Step 6: Server guard on every user status-write path
 
+Built. Where the build differs from the plan below, Claude's choices while building it:
+- `can(database, perms)` runs its role lookup on the open transaction's connection. `workspacePermissionChecker` and `isInstanceAdmin` gained an optional `database` parameter for this. Taking a second pooled connection while holding the transaction could stall under load.
+- `assertStatusMoves` runs after the write, inside the transaction. Tasks moved together then see each other's new columns: a bulk move of a task and its blocker into Done succeeds. A rejection rolls the write back.
+- Column flags come from one more small file, `get-column-flags.ts`.
+- A hidden blocker's `id` is redacted too, not only its key and title. The message counts hidden blockers ("1 task you can't see") without naming them.
+- `move-task` now also requires the task's status to be unchanged since it was read, so the rules judge the move from the right column. Otherwise it returns its existing "moved concurrently" 409.
+- Import checks every row up front and refuses the whole import with a 403, so nothing is created.
+- The bulk route has no move-to-board operation; only `updateStatus` is guarded. The web moves tasks to another board through `move-task`.
+- The five web fetchers pass `query: {}` until step 7 adds `force`.
+
 New folder `apps/api/src/task/status-guard/`, one concern per file, with tests beside them:
 - `status-guard.ts`: `statusGuard(c)` returns `{ force, can(perms) }`. `can` lazily memoizes `workspacePermissionChecker(c)` (`apps/api/src/utils/require-workspace-permission.ts:95`), so roles are looked up at most once per request, and only when a move hits a guarded column. That keeps reorders within a column free.
 - `classify-moves.ts` (pure): for each move, compare before and after. A move is "into final" when the destination column is `isFinal` and the task isn't currently completed. It is "into gated" when the destination has `blockWhileBlocked` and the task is changing column or project. A full `PUT` that resends the same status never fires.

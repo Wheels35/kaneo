@@ -4,16 +4,20 @@ import { withLockedTask } from "./with-locked-task";
 import { columnTable, taskTable } from "../../database/schema";
 import { publishEvent } from "../../events";
 import { publishTaskMutation } from "./task-mutation-effects";
+import { assertStatusMoves } from "../status-guard/assert-status-moves";
+import type { StatusGuard } from "../status-guard/status-guard";
 import { assertValidTaskStatus } from "../validate-task-fields";
 
 async function updateTaskStatus({
   id,
   status,
   currentUserId,
+  guard,
 }: {
   id: string;
   status: string;
   currentUserId: string;
+  guard?: StatusGuard;
 }) {
   const { before: existingTask, after: updatedTask } = await withLockedTask(
     id,
@@ -38,6 +42,12 @@ async function updateTaskStatus({
           message: "Failed to update task status",
         });
       }
+
+      await assertStatusMoves(
+        tx,
+        [{ taskId: id, from: existingTask, to: updatedTask }],
+        guard,
+      );
 
       return updatedTask;
     },

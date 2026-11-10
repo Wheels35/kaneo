@@ -13,6 +13,8 @@ import {
 import { publishEvent } from "../../events";
 import { assertProjectAccess } from "../../project-access/assert-project-access";
 import { filterUsersWithProjectAccess } from "../../project-access/filter-users-with-project-access";
+import { assertStatusMoves } from "../status-guard/assert-status-moves";
+import type { StatusGuard } from "../status-guard/status-guard";
 import { claimTaskNumber } from "./claim-task-numbers";
 import { nextTaskPosition } from "./next-task-position";
 
@@ -68,11 +70,13 @@ async function moveTask({
   destinationProjectId,
   destinationStatus,
   currentUserId,
+  guard,
 }: {
   taskId: string;
   destinationProjectId: string;
   destinationStatus?: string;
   currentUserId: string;
+  guard?: StatusGuard;
 }) {
   const existingTask = await db.query.taskTable.findFirst({
     where: eq(taskTable.id, taskId),
@@ -157,6 +161,8 @@ async function moveTask({
         and(
           eq(taskTable.id, taskId),
           eq(taskTable.projectId, sourceProject.id),
+          // Keeps the status the column rules judge the move from current.
+          eq(taskTable.status, existingTask.status),
         ),
       )
       .returning();
@@ -166,6 +172,13 @@ async function moveTask({
         message: "Task was moved concurrently, please try again",
       });
     }
+
+    // Judged against the destination board's columns.
+    await assertStatusMoves(
+      tx,
+      [{ taskId, from: existingTask, to: updatedTask }],
+      guard,
+    );
 
     let movedTask = updatedTask;
     const assigneeId = updatedTask.userId;

@@ -19,6 +19,8 @@ import { removeLabelFromGitlab } from "../../plugins/gitlab/utils/sync-label-to-
 import { assertAssignableUser } from "../../utils/assert-assignable-user";
 import { publishTaskMutation } from "./task-mutation-effects";
 import { getSubtaskParentProjects } from "../get-subtask-parent-projects";
+import { assertStatusMoves } from "../status-guard/assert-status-moves";
+import type { StatusGuard } from "../status-guard/status-guard";
 import {
   assertValidPriority,
   assertValidTaskStatus,
@@ -38,11 +40,13 @@ async function bulkUpdateTasks({
   operation,
   value,
   userId,
+  guard,
 }: {
   taskIds: string[];
   operation: BulkOperation;
   value?: string | null;
   userId: string;
+  guard?: StatusGuard;
 }) {
   const tasks = await db
     .select({
@@ -164,6 +168,19 @@ async function bulkUpdateTasks({
             });
           result.push(...changed);
         }
+        // All or nothing: one task with open blockers rejects the whole batch.
+        await assertStatusMoves(
+          tx,
+          result.map((task) => ({
+            taskId: task.id,
+            from: {
+              projectId: task.projectId,
+              status: beforeById.get(task.id)!.status,
+            },
+            to: task,
+          })),
+          guard,
+        );
         return { updatedTasks: result, beforeById };
       });
       updatedCount = updatedTasks.length;

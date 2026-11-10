@@ -65,6 +65,7 @@ import updateTaskPriority from "./controllers/update-task-priority";
 import updateTaskRecurrence from "./controllers/update-task-recurrence";
 import updateTaskStatus from "./controllers/update-task-status";
 import updateTaskTitle from "./controllers/update-task-title";
+import { statusGuard } from "./status-guard/status-guard";
 import {
   getDeferredDescriptionMatches,
   getDescriptionPage,
@@ -96,6 +97,7 @@ import {
   imageUploadBody,
   stagedImageUploadBody,
   finalizeStagedImageUploadBody,
+  forceQuery,
   importTasksBody,
   listTasksQuery,
   moveTaskBody,
@@ -113,6 +115,12 @@ import {
   updateTaskBody,
   updateTitleBody,
 } from "./schema";
+
+// The column rules every route that moves or creates tasks enforces.
+const DONE_RULE =
+  "Moving or creating a task in a final column needs task:move_to_done.";
+const BLOCKER_RULE =
+  "A column with Block while blocked turns away tasks with unfinished blocked-by tasks (409 OPEN_BLOCKERS); with task:override_blockers, retry with force=true to move them anyway.";
 
 const listAssignedTasksRoute = createRoute({
   method: "get",
@@ -162,14 +170,14 @@ const bulkUpdateTasksRoute = createRoute({
   path: "/bulk",
   tags: ["Tasks"],
   summary: "Bulk update tasks",
-  description:
-    "Apply one operation to many tasks at once. Every task must be in the same workspace.",
+  description: `Apply one operation to many tasks at once. Every task must be in the same workspace. updateStatus follows the column rules. ${DONE_RULE} ${BLOCKER_RULE} One refused task fails the whole operation.`,
   middleware: [
     workspaceAccess.fromTasks(),
     requireBulkTaskPermission,
     requireBulkTaskEntitlement,
   ] as const,
   request: {
+    query: forceQuery,
     body: {
       required: true,
       content: { "application/json": { schema: bulkUpdateBody } },
@@ -181,10 +189,12 @@ const bulkUpdateTasksRoute = createRoute({
       "Invalid body, or the tasks span more than one workspace",
     ),
     403: errorResponse(
-      "No access to the project, or missing the permission the operation needs",
+      "No access to the project, or missing the permission the operation needs, including task:move_to_done for a final column",
     ),
     404: errorResponse("No tasks found"),
-    409: errorResponse("Tasks changed projects; retry the operation"),
+    409: errorResponse(
+      "Tasks changed projects, or a task has unfinished blocked-by tasks (OPEN_BLOCKERS)",
+    ),
   },
 });
 
@@ -252,14 +262,14 @@ const reorderTasksRoute = createRoute({
   path: "/reorder",
   tags: ["Tasks"],
   summary: "Reorder or move cards",
-  description:
-    "Atomically update positions and optional column status for cards in one project. Other task fields are preserved.",
+  description: `Atomically update positions and optional column status for cards in one project. Other task fields are preserved. ${DONE_RULE} ${BLOCKER_RULE}`,
   middleware: [
     workspaceAccess.fromProject("projectId"),
     requireWorkspacePermission({ task: ["update"] }),
     requireEntitlement,
   ] as const,
   request: {
+    query: forceQuery,
     body: {
       required: true,
       content: { "application/json": { schema: reorderTasksBody } },
@@ -273,12 +283,14 @@ const reorderTasksRoute = createRoute({
         .array(),
     ),
     400: errorResponse("Invalid positions or column"),
-    403: errorResponse("Missing task:update permission"),
+    403: errorResponse(
+      "Missing task:update, or task:move_to_done for a final column",
+    ),
     404: errorResponse(
       "Project not found, or tasks do not belong to the project",
     ),
     409: errorResponse(
-      "Board changed or task moved; refresh before reordering",
+      "Board changed or task moved; refresh before reordering. Or a card has unfinished blocked-by tasks (OPEN_BLOCKERS)",
     ),
   },
 });
@@ -288,8 +300,7 @@ const createTaskRoute = createRoute({
   path: "/{projectId}",
   tags: ["Tasks"],
   summary: "Create task",
-  description:
-    "Add a task to a project. It is placed in the column named by `status`.",
+  description: `Add a task to a project. It is placed in the column named by \`status\`. ${DONE_RULE}`,
   middleware: [
     workspaceAccess.fromProject("projectId"),
     requireWorkspacePermission({ task: ["create"] }),
@@ -306,7 +317,7 @@ const createTaskRoute = createRoute({
     200: jsonResponse("The created task", taskSchema),
     400: errorResponse("Invalid body, or a repeating task in a final column"),
     403: errorResponse(
-      "No access to the project, or missing task:create permission",
+      "No access to the project, or missing task:create, or task:move_to_done for a final column",
     ),
     404: errorResponse("Project not found"),
   },
@@ -318,8 +329,7 @@ const duplicateTaskRoute = createRoute({
   operationId: "duplicateTask",
   tags: ["Tasks"],
   summary: "Duplicate a task",
-  description:
-    "Copy a task into the same project and column, including custom fields, labels, description assets and same-workspace parent links. Copying parent links also requires task:update. Comments, time entries and child tasks are not copied.",
+  description: `Copy a task into the same project and column, including custom fields, labels, description assets and same-workspace parent links. Copying parent links also requires task:update. Comments, time entries and child tasks are not copied. ${DONE_RULE}`,
   middleware: [
     workspaceAccess.fromTask(),
     requireWorkspacePermission({ task: ["create"] }),
@@ -337,7 +347,7 @@ const duplicateTaskRoute = createRoute({
     400: errorResponse("Invalid task fields or request"),
     401: errorResponse("Unauthorized"),
     403: errorResponse(
-      "No access to the project, missing task:create, or missing task:update when copying parent links",
+      "No access to the project, missing task:create, missing task:update when copying parent links, or missing task:move_to_done for a final column",
     ),
     404: errorResponse("Task or project not found"),
     409: errorResponse("Task column has reached its capacity"),
@@ -391,8 +401,7 @@ const moveTaskRoute = createRoute({
   path: "/move/{id}",
   tags: ["Tasks"],
   summary: "Move task",
-  description:
-    "Move a task to another project, optionally into a named column. Both projects must be in the same workspace.",
+  description: `Move a task to another project, optionally into a named column. Both projects must be in the same workspace. The column rules use the destination's columns. ${DONE_RULE} ${BLOCKER_RULE}`,
   middleware: [
     workspaceAccess.fromTask(),
     requireWorkspacePermission({ task: ["update"] }),
@@ -400,6 +409,7 @@ const moveTaskRoute = createRoute({
   ] as const,
   request: {
     params: taskParam,
+    query: forceQuery,
     body: {
       required: true,
       content: { "application/json": { schema: moveTaskBody } },
@@ -412,10 +422,12 @@ const moveTaskRoute = createRoute({
     ),
     400: errorResponse("Invalid body"),
     403: errorResponse(
-      "No access to the project, or missing task:update permission",
+      "No access to the project, or missing task:update, or task:move_to_done for a final column",
     ),
     404: errorResponse("Task or destination project not found"),
-    409: errorResponse("Task or project moved concurrently; retry the move"),
+    409: errorResponse(
+      "Task or project moved concurrently; retry the move. Or the task has unfinished blocked-by tasks (OPEN_BLOCKERS)",
+    ),
   },
 });
 
@@ -425,8 +437,7 @@ const updateTaskRoute = createRoute({
   path: "/{id}",
   tags: ["Tasks"],
   summary: "Update task",
-  description:
-    "Replace every field of a task. Use the single-field routes for narrower edits.",
+  description: `Replace every field of a task. Use the single-field routes for narrower edits. A status change follows the column rules: ${DONE_RULE} ${BLOCKER_RULE}`,
   middleware: [
     workspaceAccess.fromTask(),
     requireWorkspacePermission({ task: ["update"] }),
@@ -435,6 +446,7 @@ const updateTaskRoute = createRoute({
   ] as const,
   request: {
     params: taskParam,
+    query: forceQuery,
     body: {
       required: true,
       content: { "application/json": { schema: updateTaskBody } },
@@ -444,9 +456,12 @@ const updateTaskRoute = createRoute({
     200: jsonResponse("The updated task", taskSchema),
     400: errorResponse("Invalid body"),
     403: errorResponse(
-      "No access to the project, or missing task:update or task:assign permission",
+      "No access to the project, or missing task:update or task:assign permission, or task:move_to_done for a final column",
     ),
     404: errorResponse("Task not found"),
+    409: errorResponse(
+      "Task changed or moved; refresh before updating. Or the task has unfinished blocked-by tasks (OPEN_BLOCKERS)",
+    ),
   },
 });
 
@@ -476,8 +491,7 @@ const importTasksRoute = createRoute({
   path: "/import/{projectId}",
   tags: ["Tasks"],
   summary: "Import tasks",
-  description:
-    "Import tasks into a project. Each task is reported individually, so a partial import still returns 200.",
+  description: `Import tasks into a project. Each task is reported individually, so a partial import still returns 200. ${DONE_RULE} It is checked for the whole import before anything is created.`,
   middleware: [
     workspaceAccess.fromProject("projectId"),
     requireWorkspacePermission({ task: ["create"] }),
@@ -494,7 +508,7 @@ const importTasksRoute = createRoute({
     200: jsonResponse("Per-task import outcome", taskImportResultSchema),
     400: errorResponse("Invalid body"),
     403: errorResponse(
-      "No access to the project, or missing task:create permission",
+      "No access to the project, or missing task:create, or task:move_to_done when a task goes into a final column",
     ),
     404: errorResponse("Project not found"),
   },
@@ -529,7 +543,7 @@ const updateTaskStatusRoute = createRoute({
   path: "/status/{id}",
   tags: ["Tasks"],
   summary: "Update task status",
-  description: "Move a task to another column in the same project.",
+  description: `Move a task to another column in the same project. ${DONE_RULE} ${BLOCKER_RULE}`,
   middleware: [
     workspaceAccess.fromTask(),
     requireWorkspacePermission({ task: ["update"] }),
@@ -537,6 +551,7 @@ const updateTaskStatusRoute = createRoute({
   ] as const,
   request: {
     params: taskParam,
+    query: forceQuery,
     body: {
       required: true,
       content: { "application/json": { schema: updateStatusBody } },
@@ -546,9 +561,12 @@ const updateTaskStatusRoute = createRoute({
     200: jsonResponse("The updated task", taskSchema),
     400: errorResponse("Invalid body"),
     403: errorResponse(
-      "No access to the project, or missing task:update permission",
+      "No access to the project, or missing task:update, or task:move_to_done for a final column",
     ),
     404: errorResponse("Task not found"),
+    409: errorResponse(
+      "The task has unfinished blocked-by tasks (OPEN_BLOCKERS)",
+    ),
   },
 });
 
@@ -897,6 +915,7 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
       operation,
       value,
       userId,
+      guard: statusGuard(c),
     });
 
     return c.json(result, 200);
@@ -925,7 +944,13 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
   .openapi(reorderTasksRoute, async (c) => {
     const { projectId, tasks, expectedTasks } = c.req.valid("json");
     return c.json(
-      await reorderTasks(projectId, tasks, c.get("userId"), expectedTasks),
+      await reorderTasks(
+        projectId,
+        tasks,
+        c.get("userId"),
+        expectedTasks,
+        statusGuard(c),
+      ),
       200,
     );
   })
@@ -968,6 +993,7 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
       recurrence,
       customFields,
       draftAssetIds,
+      guard: statusGuard(c),
     });
 
     return c.json(task, 200);
@@ -981,6 +1007,7 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
         title,
         currentUserId: c.get("userId"),
         canUpdateTasks: await hasWorkspacePermission(c, { task: ["update"] }),
+        guard: statusGuard(c),
       }),
       200,
     );
@@ -1018,6 +1045,7 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
       destinationProjectId,
       destinationStatus,
       currentUserId,
+      guard: statusGuard(c),
     });
 
     return c.json(result, 200);
@@ -1061,6 +1089,7 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
       position,
       userId,
       currentUserId,
+      statusGuard(c),
     );
 
     return c.json(task, 200);
@@ -1077,7 +1106,12 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
     const { tasks } = c.req.valid("json");
     const currentUserId = c.get("userId");
 
-    const result = await importTasks(projectId, tasks, currentUserId);
+    const result = await importTasks(
+      projectId,
+      tasks,
+      currentUserId,
+      statusGuard(c),
+    );
 
     return c.json(result, 200);
   })
@@ -1094,7 +1128,12 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
     const { status } = c.req.valid("json");
     const currentUserId = c.get("userId");
 
-    const task = await updateTaskStatus({ id, status, currentUserId });
+    const task = await updateTaskStatus({
+      id,
+      status,
+      currentUserId,
+      guard: statusGuard(c),
+    });
 
     return c.json(task, 200);
   })

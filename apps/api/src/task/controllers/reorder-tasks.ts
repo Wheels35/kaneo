@@ -3,6 +3,8 @@ import { HTTPException } from "hono/http-exception";
 import db from "../../database";
 import { columnTable, projectTable, taskTable } from "../../database/schema";
 import { publishEvent } from "../../events";
+import { assertStatusMoves } from "../status-guard/assert-status-moves";
+import type { StatusGuard } from "../status-guard/status-guard";
 import { assertValidTaskStatus } from "../validate-task-fields";
 import { assertTaskPosition } from "./next-task-position";
 import { publishTaskMutation } from "./task-mutation-effects";
@@ -13,6 +15,7 @@ export default async function reorderTasks(
   tasks: Reorder[],
   userId: string,
   expectedTasks?: { id: string; position: number | null; status: string }[],
+  guard?: StatusGuard,
 ) {
   if (new Set(tasks.map((task) => task.id)).size !== tasks.length)
     throw new HTTPException(400, { message: "Task IDs must be unique" });
@@ -128,6 +131,16 @@ export default async function reorderTasks(
       throw new HTTPException(409, {
         message: "Task changed projects; retry the move",
       });
+    const priorStatus = new Map(before.map((task) => [task.id, task.status]));
+    await assertStatusMoves(
+      tx,
+      after.map((task) => ({
+        taskId: task.id,
+        from: { projectId, status: priorStatus.get(task.id)! },
+        to: task,
+      })),
+      guard,
+    );
     return { before, after };
   });
   const beforeById = new Map(before.map((task) => [task.id, task]));

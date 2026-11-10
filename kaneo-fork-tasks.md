@@ -51,14 +51,14 @@ Work items for [kaneo-fork-plan.md](./kaneo-fork-plan.md); design details and fi
 
 ## 6. Server guard
 
-- [ ] Add `apps/api/src/task/status-guard/`: `status-guard.ts`, `classify-moves.ts`, `get-open-blockers.ts`, `open-blockers-error.ts`, `assert-status-moves.ts`, with unit tests beside them
-- [ ] Extend `ApiError`, `errorBody` and `api-error-schema.ts` with `overridable` and `blockers`
-- [ ] Add the `force` query to the moving routes
-- [ ] Wire both rules into `update-task-status`, `update-task`, `bulk-update-tasks`, `reorder-tasks`, `move-task`
-- [ ] Wire rule 1 into `create-task`, `duplicate-task`, `import-tasks`
-- [ ] Test: `tests/api-integration/task-status-guard.test.ts` (every path, roles, force, archived blocker, subtask without a block, redaction)
-- [ ] Test: 409 `message` reaches MCP tool results in `tests/api/mcp-tools.test.ts`
-- [ ] Update route descriptions; `pnpm openapi:check:fix`
+- [x] Add `apps/api/src/task/status-guard/`: `status-guard.ts`, `classify-moves.ts`, `get-open-blockers.ts`, `open-blockers-error.ts`, `assert-status-moves.ts`, with unit tests beside them
+- [x] Extend `ApiError`, `errorBody` and `api-error-schema.ts` with `overridable` and `blockers`
+- [x] Add the `force` query to the moving routes
+- [x] Wire both rules into `update-task-status`, `update-task`, `bulk-update-tasks`, `reorder-tasks`, `move-task`
+- [x] Wire rule 1 into `create-task`, `duplicate-task`, `import-tasks`
+- [x] Test: `tests/api-integration/task-status-guard.test.ts` (every path, roles, force, archived blocker, subtask without a block, redaction)
+- [x] Test: 409 `message` reaches MCP tool results in `tests/api/mcp-tools.test.ts`
+- [x] Update route descriptions; `pnpm openapi:check:fix`
 
 ## 7. Web dialog and force retry
 

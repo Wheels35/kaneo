@@ -91,18 +91,21 @@ export async function hasWorkspacePermission(
 }
 
 // Same rules as `hasWorkspacePermission`, but resolves the caller's roles once
-// so many checks (the UI's capability map) cost a single lookup.
+// so many checks (the UI's capability map) cost a single lookup. Inside a
+// transaction, pass it as `database` so the lookup doesn't wait on a second
+// pooled connection.
 export async function workspacePermissionChecker(
   c: Context,
+  database: Pick<typeof db, "select"> = db,
 ): Promise<(permissions: PermissionMap) => boolean> {
   const workspaceId = c.get("workspaceId");
   if (!workspaceId) return () => false;
 
   const scope = apiKeyPermissions(c);
-  const isAdmin = await isInstanceAdmin(c);
+  const isAdmin = await isInstanceAdmin(c, database);
   const { roles, stored } = isAdmin
     ? { roles: [], stored: [] }
-    : await memberRoles(c, workspaceId);
+    : await memberRoles(c, workspaceId, database);
 
   return (permissions) => {
     if (scope && !satisfies(scope, permissions)) return false;
@@ -113,11 +116,12 @@ export async function workspacePermissionChecker(
 async function memberRoles(
   c: Context,
   workspaceId: string,
+  database: Pick<typeof db, "select"> = db,
 ): Promise<{ roles: string[]; stored: StoredRolePermission[] }> {
   const userId = c.get("userId");
   if (!userId) return { roles: [], stored: [] };
 
-  const [member] = await db
+  const [member] = await database
     .select({ role: schema.workspaceUserTable.role })
     .from(schema.workspaceUserTable)
     .where(
@@ -137,7 +141,7 @@ async function memberRoles(
   const roles = splitRoles(member?.role);
   return {
     roles,
-    stored: await storedRolePermissions(workspaceId, roles, db),
+    stored: await storedRolePermissions(workspaceId, roles, database),
   };
 }
 

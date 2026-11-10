@@ -13,6 +13,7 @@ async function moveTask({
 }) {
   const response = await client.task.move[":id"].$put({
     param: { id: taskId },
+    query: {},
     json: {
       destinationProjectId,
       destinationStatus,

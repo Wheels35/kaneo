@@ -73,7 +73,7 @@
           },
           "code": {
             "type": "string",
-            "description": "Stable UPPER_SNAKE_CASE code. Derived from the status unless a more specific code applies, such as VALIDATION_ERROR or MISSING_PERMISSION.",
+            "description": "Stable UPPER_SNAKE_CASE code. Derived from the status unless a more specific code applies, such as VALIDATION_ERROR, MISSING_PERMISSION or OPEN_BLOCKERS.",
             "example": "NOT_FOUND"
           },
           "issues": {
@@ -107,6 +107,50 @@
             "example": [
               "task:update"
             ]
+          },
+          "overridable": {
+            "type": "boolean",
+            "description": "For OPEN_BLOCKERS: true when the caller has task:override_blockers and can retry with force=true to move the task anyway."
+          },
+          "blockers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "taskId": {
+                  "type": "string",
+                  "description": "The task that can't move."
+                },
+                "id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The unfinished task it is blocked by. Null, like key and title, when the caller can't see that task's project."
+                },
+                "key": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "example": "BUILD-3"
+                },
+                "title": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "example": "Write the parser"
+                }
+              },
+              "required": [
+                "taskId",
+                "id",
+                "key",
+                "title"
+              ]
+            },
+            "description": "For OPEN_BLOCKERS: one entry per unfinished blocked-by task of each task that can't move."
           }
         },
         "required": [
@@ -12339,7 +12383,23 @@
           "Tasks"
         ],
         "summary": "Bulk update tasks",
-        "description": "Apply one operation to many tasks at once. Every task must be in the same workspace.",
+        "description": "Apply one operation to many tasks at once. Every task must be in the same workspace. updateStatus follows the column rules. Moving or creating a task in a final column needs task:move_to_done. A column with Block while blocked turns away tasks with unfinished blocked-by tasks (409 OPEN_BLOCKERS); with task:override_blockers, retry with force=true to move them anyway. One refused task fails the whole operation.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "description": "Pass \"true\" to move tasks into a Block while blocked column despite unfinished blocked-by tasks. Needs task:override_blockers; without it the request still fails with OPEN_BLOCKERS. Never bypasses task:move_to_done."
+            },
+            "required": false,
+            "description": "Pass \"true\" to move tasks into a Block while blocked column despite unfinished blocked-by tasks. Needs task:override_blockers; without it the request still fails with OPEN_BLOCKERS. Never bypasses task:move_to_done.",
+            "name": "force",
+            "in": "query"
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -12414,7 +12474,7 @@
             }
           },
           "403": {
-            "description": "No access to the project, or missing the permission the operation needs",
+            "description": "No access to the project, or missing the permission the operation needs, including task:move_to_done for a final column",
             "content": {
               "application/json": {
                 "schema": {
@@ -12434,7 +12494,7 @@
             }
           },
           "409": {
-            "description": "Tasks changed projects; retry the operation",
+            "description": "Tasks changed projects, or a task has unfinished blocked-by tasks (OPEN_BLOCKERS)",
             "content": {
               "application/json": {
                 "schema": {
@@ -12706,7 +12766,23 @@
           "Tasks"
         ],
         "summary": "Reorder or move cards",
-        "description": "Atomically update positions and optional column status for cards in one project. Other task fields are preserved.",
+        "description": "Atomically update positions and optional column status for cards in one project. Other task fields are preserved. Moving or creating a task in a final column needs task:move_to_done. A column with Block while blocked turns away tasks with unfinished blocked-by tasks (409 OPEN_BLOCKERS); with task:override_blockers, retry with force=true to move them anyway.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "description": "Pass \"true\" to move tasks into a Block while blocked column despite unfinished blocked-by tasks. Needs task:override_blockers; without it the request still fails with OPEN_BLOCKERS. Never bypasses task:move_to_done."
+            },
+            "required": false,
+            "description": "Pass \"true\" to move tasks into a Block while blocked column despite unfinished blocked-by tasks. Needs task:override_blockers; without it the request still fails with OPEN_BLOCKERS. Never bypasses task:move_to_done.",
+            "name": "force",
+            "in": "query"
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -12829,7 +12905,7 @@
             }
           },
           "403": {
-            "description": "Missing task:update permission",
+            "description": "Missing task:update, or task:move_to_done for a final column",
             "content": {
               "application/json": {
                 "schema": {
@@ -12849,7 +12925,7 @@
             }
           },
           "409": {
-            "description": "Board changed or task moved; refresh before reordering",
+            "description": "Board changed or task moved; refresh before reordering. Or a card has unfinished blocked-by tasks (OPEN_BLOCKERS)",
             "content": {
               "application/json": {
                 "schema": {
@@ -12871,7 +12947,7 @@
           "Tasks"
         ],
         "summary": "Create task",
-        "description": "Add a task to a project. It is placed in the column named by `status`.",
+        "description": "Add a task to a project. It is placed in the column named by `status`. Moving or creating a task in a final column needs task:move_to_done.",
         "parameters": [
           {
             "schema": {
@@ -12997,7 +13073,7 @@
             }
           },
           "403": {
-            "description": "No access to the project, or missing task:create permission",
+            "description": "No access to the project, or missing task:create, or task:move_to_done for a final column",
             "content": {
               "application/json": {
                 "schema": {
@@ -13029,7 +13105,7 @@
           "Tasks"
         ],
         "summary": "Duplicate a task",
-        "description": "Copy a task into the same project and column, including custom fields, labels, description assets and same-workspace parent links. Copying parent links also requires task:update. Comments, time entries and child tasks are not copied.",
+        "description": "Copy a task into the same project and column, including custom fields, labels, description assets and same-workspace parent links. Copying parent links also requires task:update. Comments, time entries and child tasks are not copied. Moving or creating a task in a final column needs task:move_to_done.",
         "parameters": [
           {
             "schema": {
@@ -13087,7 +13163,7 @@
             }
           },
           "403": {
-            "description": "No access to the project, missing task:create, or missing task:update when copying parent links",
+            "description": "No access to the project, missing task:create, missing task:update when copying parent links, or missing task:move_to_done for a final column",
             "content": {
               "application/json": {
                 "schema": {
@@ -13326,7 +13402,7 @@
           "Tasks"
         ],
         "summary": "Update task",
-        "description": "Replace every field of a task. Use the single-field routes for narrower edits.",
+        "description": "Replace every field of a task. Use the single-field routes for narrower edits. A status change follows the column rules: Moving or creating a task in a final column needs task:move_to_done. A column with Block while blocked turns away tasks with unfinished blocked-by tasks (409 OPEN_BLOCKERS); with task:override_blockers, retry with force=true to move them anyway.",
         "parameters": [
           {
             "schema": {
@@ -13335,6 +13411,20 @@
             "required": true,
             "name": "id",
             "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "description": "Pass \"true\" to move tasks into a Block while blocked column despite unfinished blocked-by tasks. Needs task:override_blockers; without it the request still fails with OPEN_BLOCKERS. Never bypasses task:move_to_done."
+            },
+            "required": false,
+            "description": "Pass \"true\" to move tasks into a Block while blocked column despite unfinished blocked-by tasks. Needs task:override_blockers; without it the request still fails with OPEN_BLOCKERS. Never bypasses task:move_to_done.",
+            "name": "force",
+            "in": "query"
           }
         ],
         "requestBody": {
@@ -13425,7 +13515,7 @@
             }
           },
           "403": {
-            "description": "No access to the project, or missing task:update or task:assign permission",
+            "description": "No access to the project, or missing task:update or task:assign permission, or task:move_to_done for a final column",
             "content": {
               "application/json": {
                 "schema": {
@@ -13436,6 +13526,16 @@
           },
           "404": {
             "description": "Task not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Task changed or moved; refresh before updating. Or the task has unfinished blocked-by tasks (OPEN_BLOCKERS)",
             "content": {
               "application/json": {
                 "schema": {
@@ -13530,7 +13630,7 @@
           "Tasks"
         ],
         "summary": "Move task",
-        "description": "Move a task to another project, optionally into a named column. Both projects must be in the same workspace.",
+        "description": "Move a task to another project, optionally into a named column. Both projects must be in the same workspace. The column rules use the destination's columns. Moving or creating a task in a final column needs task:move_to_done. A column with Block while blocked turns away tasks with unfinished blocked-by tasks (409 OPEN_BLOCKERS); with task:override_blockers, retry with force=true to move them anyway.",
         "parameters": [
           {
             "schema": {
@@ -13539,6 +13639,20 @@
             "required": true,
             "name": "id",
             "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "description": "Pass \"true\" to move tasks into a Block while blocked column despite unfinished blocked-by tasks. Needs task:override_blockers; without it the request still fails with OPEN_BLOCKERS. Never bypasses task:move_to_done."
+            },
+            "required": false,
+            "description": "Pass \"true\" to move tasks into a Block while blocked column despite unfinished blocked-by tasks. Needs task:override_blockers; without it the request still fails with OPEN_BLOCKERS. Never bypasses task:move_to_done.",
+            "name": "force",
+            "in": "query"
           }
         ],
         "requestBody": {
@@ -13595,7 +13709,7 @@
             }
           },
           "403": {
-            "description": "No access to the project, or missing task:update permission",
+            "description": "No access to the project, or missing task:update, or task:move_to_done for a final column",
             "content": {
               "application/json": {
                 "schema": {
@@ -13615,7 +13729,7 @@
             }
           },
           "409": {
-            "description": "Task or project moved concurrently; retry the move",
+            "description": "Task or project moved concurrently; retry the move. Or the task has unfinished blocked-by tasks (OPEN_BLOCKERS)",
             "content": {
               "application/json": {
                 "schema": {
@@ -13702,7 +13816,7 @@
           "Tasks"
         ],
         "summary": "Import tasks",
-        "description": "Import tasks into a project. Each task is reported individually, so a partial import still returns 200.",
+        "description": "Import tasks into a project. Each task is reported individually, so a partial import still returns 200. Moving or creating a task in a final column needs task:move_to_done. It is checked for the whole import before anything is created.",
         "parameters": [
           {
             "schema": {
@@ -13804,7 +13918,7 @@
             }
           },
           "403": {
-            "description": "No access to the project, or missing task:create permission",
+            "description": "No access to the project, or missing task:create, or task:move_to_done when a task goes into a final column",
             "content": {
               "application/json": {
                 "schema": {
@@ -13836,7 +13950,7 @@
           "Tasks"
         ],
         "summary": "Update task status",
-        "description": "Move a task to another column in the same project.",
+        "description": "Move a task to another column in the same project. Moving or creating a task in a final column needs task:move_to_done. A column with Block while blocked turns away tasks with unfinished blocked-by tasks (409 OPEN_BLOCKERS); with task:override_blockers, retry with force=true to move them anyway.",
         "parameters": [
           {
             "schema": {
@@ -13845,6 +13959,20 @@
             "required": true,
             "name": "id",
             "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "description": "Pass \"true\" to move tasks into a Block while blocked column despite unfinished blocked-by tasks. Needs task:override_blockers; without it the request still fails with OPEN_BLOCKERS. Never bypasses task:move_to_done."
+            },
+            "required": false,
+            "description": "Pass \"true\" to move tasks into a Block while blocked column despite unfinished blocked-by tasks. Needs task:override_blockers; without it the request still fails with OPEN_BLOCKERS. Never bypasses task:move_to_done.",
+            "name": "force",
+            "in": "query"
           }
         ],
         "requestBody": {
@@ -13897,7 +14025,7 @@
             }
           },
           "403": {
-            "description": "No access to the project, or missing task:update permission",
+            "description": "No access to the project, or missing task:update, or task:move_to_done for a final column",
             "content": {
               "application/json": {
                 "schema": {
@@ -13908,6 +14036,16 @@
           },
           "404": {
             "description": "Task not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The task has unfinished blocked-by tasks (OPEN_BLOCKERS)",
             "content": {
               "application/json": {
                 "schema": {

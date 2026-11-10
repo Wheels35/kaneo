@@ -302,4 +302,29 @@ describe("MCP tool catalog", () => {
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain("Task not found");
   });
+
+  it("tells the agent why a status move was refused", async () => {
+    apiFetch.mockResolvedValueOnce(
+      Response.json(
+        {
+          code: "OPEN_BLOCKERS",
+          message:
+            'This task is still blocked by BUILD-3 "Parser". Finish it first.',
+          overridable: false,
+          blockers: [],
+        },
+        { status: 409 },
+      ),
+    );
+
+    const result = await call("update_task_status", {
+      taskId: "t1",
+      status: "in-review",
+    });
+
+    expect(result.isError).toBe(true);
+    expect(JSON.parse(result.content[0].text).error).toContain(
+      'blocked by BUILD-3 "Parser". Finish it first.',
+    );
+  });
 });

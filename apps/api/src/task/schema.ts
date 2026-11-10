@@ -6,6 +6,13 @@ import { VALID_PRIORITIES } from "./validate-task-fields";
 
 export const taskParam = z.object({ id: z.string() });
 
+export const forceQuery = z.object({
+  force: z.enum(["true", "false"]).optional().openapi({
+    description:
+      'Pass "true" to move tasks into a Block while blocked column despite unfinished blocked-by tasks. Needs task:override_blockers; without it the request still fails with OPEN_BLOCKERS. Never bypasses task:move_to_done.',
+  }),
+});
+
 export const ticketIdParam = z.object({
   ticketId: z
     .string()

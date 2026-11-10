@@ -21,6 +21,7 @@ async function bulkOperation({
   value?: string | null;
 }) {
   const response = await client.task.bulk.$patch({
+    query: {},
     json: { taskIds, operation, value },
   });
 

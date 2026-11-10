@@ -24,6 +24,8 @@ import {
 } from "../../utils/assert-assignable-user";
 import { nextOccurrenceDates } from "../recurrence/next-occurrence-date";
 import { OccurrenceProjectChangedError } from "../recurrence/occurrence-project-changed-error";
+import { assertStatusMoves } from "../status-guard/assert-status-moves";
+import type { StatusGuard } from "../status-guard/status-guard";
 import { taskIsCompleted } from "../task-is-completed";
 import {
   assertRequiredCustomFields,
@@ -129,6 +131,7 @@ type DuplicateTaskOptions = {
   currentUserId: string;
   canUpdateTasks: boolean;
   title?: string;
+  guard?: StatusGuard;
 };
 
 // The next occurrence of a recurring task: a copy in a new status that takes
@@ -157,6 +160,7 @@ async function duplicateTask({
   currentUserId,
   canUpdateTasks,
   title,
+  guard,
   occurrence,
 }: DuplicateTaskOptions & {
   occurrence?: Occurrence;
@@ -189,6 +193,11 @@ async function duplicateTask({
 
   const status = occurrence?.status ?? sourceTask.status;
   await assertValidTaskStatus(status, sourceTask.projectId);
+  await assertStatusMoves(
+    db,
+    [{ to: { projectId: sourceTask.projectId, status } }],
+    guard,
+  );
   // A manual copy reports a departed assignee; an occurrence goes unassigned
   // so the series keeps going.
   let userId = sourceTask.userId;
