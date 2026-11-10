@@ -3754,6 +3754,9 @@
 			"startsOn": "Mulai {{date}}",
 			"beforeStart": "{{date}} sebelum tanggal mulai",
 			"afterDue": "{{date}} setelah tenggat"
+		},
+		"parent": {
+			"open": "Open parent task {{name}}"
 		}
 	},
 	"invitations": {

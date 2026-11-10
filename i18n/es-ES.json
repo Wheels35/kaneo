@@ -3898,6 +3898,9 @@
 			"startsOn": "Empieza: {{date}}",
 			"beforeStart": "{{date}} es anterior a la fecha de inicio",
 			"afterDue": "{{date}} es posterior a la fecha límite"
+		},
+		"parent": {
+			"open": "Open parent task {{name}}"
 		}
 	},
 	"invitations": {

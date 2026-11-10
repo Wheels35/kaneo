@@ -4258,6 +4258,9 @@
 			"startsOn": "Początek: {{date}}",
 			"beforeStart": "{{date}} jest przed datą rozpoczęcia",
 			"afterDue": "{{date}} jest po terminie"
+		},
+		"parent": {
+			"open": "Open parent task {{name}}"
 		}
 	},
 	"press": {

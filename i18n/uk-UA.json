@@ -3970,6 +3970,9 @@
 			"startsOn": "Початок: {{date}}",
 			"beforeStart": "{{date}} раніше за дату початку",
 			"afterDue": "{{date}} пізніше за термін"
+		},
+		"parent": {
+			"open": "Open parent task {{name}}"
 		}
 	},
 	"invitations": {

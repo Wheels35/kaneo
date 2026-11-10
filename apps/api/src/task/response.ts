@@ -3,6 +3,24 @@ import { taskRecurrenceSchema } from "./recurrence/schema";
 
 const priorityDescription = "One of: no-priority, low, medium, high, urgent.";
 
+const taskParentSchema = z
+  .object({
+    id: z.string(),
+    number: z.number().nullable(),
+    title: z.string(),
+    projectId: z.string(),
+    projectSlug: z.string().openapi({
+      description:
+        "The parent's own project slug; its key is {projectSlug}-{number}.",
+    }),
+  })
+  .openapi("TaskParent");
+
+const taskParentField = taskParentSchema.nullable().optional().openapi({
+  description:
+    "The task's subtask parent, which may sit on another board in the workspace. The oldest link wins when there are several. Null when there is none or you cannot see its project; always null on public boards. Included in the board view.",
+});
+
 export const taskSchema = z
   .object({
     id: z.string(),
@@ -59,6 +77,7 @@ export const taskWithAssigneeSchema = taskSchema
         }),
       )
       .optional(),
+    parent: taskParentField,
     assigneeName: z.string().nullable(),
     assigneeId: z.string().nullable(),
   })
@@ -125,6 +144,7 @@ export const boardTaskSchema = z
         description:
           "Direct subtasks in the workspace; completed means a final column in the child project. Public boards count only children in public projects.",
       }),
+    parent: taskParentField,
     labels: z.array(taskLabelSchema),
     externalLinks: z.array(taskExternalLinkSchema),
   })

@@ -20,6 +20,7 @@ import { AssigneeButton } from "@/components/task-chips/assignee-button";
 import { ChecklistChip } from "@/components/task-chips/checklist-chip";
 import { DueDateChip } from "@/components/task-chips/due-date-chip";
 import { LabelChips } from "@/components/task-chips/label-chips";
+import { ParentTaskLink } from "@/components/task-chips/parent-task-link";
 import { PriorityChip } from "@/components/task-chips/priority-chip";
 import { SubtasksChip } from "@/components/task-chips/subtasks-chip";
 import { taskChipClass } from "@/components/task-chips/task-chip-class";
@@ -183,10 +184,16 @@ function TaskCardContent({
               </div>
             )}
 
+            <ParentTaskLink
+              task={task}
+              workspaceId={workspaceId}
+              className={cn(showIdRow && "mt-1")}
+            />
+
             <div
               className={cn(
                 "line-clamp-3 break-words text-[13px] leading-[18px]",
-                showIdRow && "mt-1",
+                (showIdRow || task.parent) && "mt-1",
                 taskIsCompleted
                   ? "text-board-title-done"
                   : "font-medium text-board-title",

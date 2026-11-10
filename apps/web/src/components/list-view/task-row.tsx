@@ -306,6 +306,7 @@ function TaskRow({
               isCompleted={taskIsCompleted}
               assigneeName={assignee?.user?.name ?? task.assigneeName}
               assigneeImage={assignee?.user?.image}
+              showParent={depth === 0}
             />
           </div>
         </ContextMenuTrigger>

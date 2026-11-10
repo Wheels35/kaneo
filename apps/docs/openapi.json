@@ -299,6 +299,41 @@
             ],
             "description": "Direct subtasks in the workspace; completed means a final column in the child project. Public boards count only children in public projects."
           },
+          "parent": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "number": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "title": {
+                "type": "string"
+              },
+              "projectId": {
+                "type": "string"
+              },
+              "projectSlug": {
+                "type": "string",
+                "description": "The parent's own project slug; its key is {projectSlug}-{number}."
+              }
+            },
+            "required": [
+              "id",
+              "number",
+              "title",
+              "projectId",
+              "projectSlug"
+            ],
+            "description": "The task's subtask parent, which may sit on another board in the workspace. The oldest link wins when there are several. Null when there is none or you cannot see its project; always null on public boards. Included in the board view."
+          },
           "labels": {
             "type": "array",
             "items": {
@@ -1437,6 +1472,41 @@
                     "total"
                   ]
                 }
+              },
+              "parent": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "number": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "projectId": {
+                    "type": "string"
+                  },
+                  "projectSlug": {
+                    "type": "string",
+                    "description": "The parent's own project slug; its key is {projectSlug}-{number}."
+                  }
+                },
+                "required": [
+                  "id",
+                  "number",
+                  "title",
+                  "projectId",
+                  "projectSlug"
+                ],
+                "description": "The task's subtask parent, which may sit on another board in the workspace. The oldest link wins when there are several. Null when there is none or you cannot see its project; always null on public boards. Included in the board view."
               },
               "assigneeName": {
                 "type": [

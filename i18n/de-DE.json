@@ -3826,6 +3826,9 @@
 			"startsOn": "Beginnt {{date}}",
 			"beforeStart": "{{date}} liegt vor dem Startdatum",
 			"afterDue": "{{date}} liegt nach dem Fälligkeitsdatum"
+		},
+		"parent": {
+			"open": "Open parent task {{name}}"
 		}
 	},
 	"invitations": {

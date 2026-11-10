@@ -498,6 +498,92 @@ describe("TaskRow", () => {
     const toggle = screen.getByLabelText("tasks:listView.collapseSubtasks");
     expect(toggle).toHaveAttribute("aria-expanded", "true");
   });
+
+  const withParent = (projectId: string): Task => ({
+    ...task,
+    parent: {
+      id: "parent-1",
+      number: 5,
+      title: "Build phase",
+      projectId,
+      projectSlug: "PLAN",
+    },
+  });
+
+  it.each(["board", "list"])(
+    "opens a parent on another board from the %s view without opening the task",
+    (view) => {
+      const child = withParent("project-2");
+      render(
+        view === "board" ? (
+          <TaskCard task={child} />
+        ) : (
+          <TaskRow task={child} projectSlug="kan" />
+        ),
+      );
+
+      const link = screen.getByRole("button", { name: "tasks:parent.open" });
+      expect(link).toHaveTextContent("PLAN-5Build phase");
+      expect(interpolations).toContainEqual({ name: "PLAN-5 Build phase" });
+
+      fireEvent.click(link);
+      expect(navigate).toHaveBeenCalledTimes(1);
+      expect(navigate).toHaveBeenCalledWith({
+        to: "/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId",
+        params: {
+          workspaceId: "workspace-1",
+          projectId: "project-2",
+          taskId: "parent-1",
+        },
+      });
+    },
+  );
+
+  it.each(["board", "list"])(
+    "opens a parent on the same board in the side sheet from the %s view",
+    (view) => {
+      const child = withParent("project-1");
+      render(
+        view === "board" ? (
+          <TaskCard task={child} />
+        ) : (
+          <TaskRow task={child} projectSlug="kan" />
+        ),
+      );
+
+      fireEvent.click(
+        screen.getByRole("button", { name: "tasks:parent.open" }),
+      );
+      expect(navigate).toHaveBeenCalledTimes(1);
+      expect(navigate).toHaveBeenCalledWith({
+        to: ".",
+        search: { taskId: "parent-1" },
+      });
+    },
+  );
+
+  it("shows the parent line only on rows not already nested under it", () => {
+    const child = withParent("project-2");
+    render(
+      <>
+        <TaskRow task={child} projectSlug="kan" />
+        <TaskRow task={child} projectSlug="kan" rowId="p/task-1" depth={1} />
+        <TaskRow task={{ ...task, id: "task-2" }} projectSlug="kan" />
+      </>,
+    );
+
+    expect(
+      screen.getAllByRole("button", { name: "tasks:parent.open" }),
+    ).toHaveLength(1);
+  });
+
+  it("shows the parent line on backlog rows", () => {
+    render(<BacklogTaskRow task={withParent("project-2")} />);
+
+    expect(
+      screen.getByRole("button", { name: "tasks:parent.open" }),
+    ).toHaveTextContent("PLAN-5");
+  });
 });
 
 vi.mock(

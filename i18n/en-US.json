@@ -3269,6 +3269,9 @@
 			"ticketNotFoundDescription": "No task with the ID {{ticketId}} exists in this workspace, or you don't have access to it.",
 			"customFields": "Custom Fields"
 		},
+		"parent": {
+			"open": "Open parent task {{name}}"
+		},
 		"detail": {
 			"subtaskOf": "Subtask of",
 			"activity": "Activity",

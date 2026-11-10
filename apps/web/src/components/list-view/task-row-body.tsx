@@ -8,6 +8,7 @@ import { AssigneeButton } from "@/components/task-chips/assignee-button";
 import { ChecklistChip } from "@/components/task-chips/checklist-chip";
 import { DueDateChip } from "@/components/task-chips/due-date-chip";
 import { LabelChips } from "@/components/task-chips/label-chips";
+import { ParentTaskLink } from "@/components/task-chips/parent-task-link";
 import { stopCardEvents } from "@/components/task-chips/stop-card-events";
 import { SubtasksChip } from "@/components/task-chips/subtasks-chip";
 import { cn } from "@/lib/cn";
@@ -30,6 +31,8 @@ type TaskRowBodyProps = {
   assigneeName: string | null | undefined;
   assigneeImage: string | null | undefined;
   showPullRequests?: boolean;
+  /** Off for a row already nested under its parent. */
+  showParent?: boolean;
 };
 
 export function TaskRowBody({
@@ -40,6 +43,7 @@ export function TaskRowBody({
   assigneeName,
   assigneeImage,
   showPullRequests = true,
+  showParent = true,
 }: TaskRowBodyProps) {
   const { t } = useTranslation();
   const {
@@ -79,6 +83,13 @@ export function TaskRowBody({
 
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <span className="truncate text-foreground text-sm">{task.title}</span>
+        {showParent && (
+          <ParentTaskLink
+            task={task}
+            workspaceId={workspaceId}
+            className="max-w-[40%] shrink"
+          />
+        )}
         <div className="flex shrink-0 items-center gap-0.5">
           <SubtasksChip
             task={task}

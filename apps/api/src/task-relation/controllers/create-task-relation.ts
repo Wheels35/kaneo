@@ -8,6 +8,7 @@ import {
 } from "../../database/schema";
 import { publishEvent } from "../../events";
 import { assertProjectAccess } from "../../project-access/assert-project-access";
+import { refreshChildBoard } from "../refresh-child-board";
 
 async function createTaskRelation({
   sourceTaskId,
@@ -28,7 +29,7 @@ async function createTaskRelation({
     });
   }
 
-  const { relation, sourceTask } = await db.transaction(async (tx) => {
+  const created = await db.transaction(async (tx) => {
     // Serialize relation creation with project moves before validating either
     // workspace. A move must see this relation or this request must see the move.
     await tx
@@ -128,8 +129,9 @@ async function createTaskRelation({
       });
     }
 
-    return { relation, sourceTask };
+    return { relation, sourceTask, targetTask };
   });
+  const { relation, sourceTask, targetTask } = created;
 
   await publishEvent("task-relation.created", {
     ...relation,
@@ -137,6 +139,11 @@ async function createTaskRelation({
     projectId: sourceTask.projectId,
     userId,
   });
+  await refreshChildBoard(
+    relationType,
+    sourceTask.projectId,
+    targetTask.projectId,
+  );
 
   return relation;
 }

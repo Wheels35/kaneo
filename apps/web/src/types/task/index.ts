@@ -17,6 +17,14 @@ type TaskExternalLink = {
   metadata: Record<string, unknown> | null;
 };
 
+export type TaskParent = {
+  id: string;
+  number: number | null;
+  title: string;
+  projectId: string;
+  projectSlug: string;
+};
+
 type TaskCustomFieldValue = {
   fieldId: string;
   value: string | null;
@@ -43,6 +51,7 @@ type Task = {
   projectId: string;
   columnId?: string | null;
   subtaskCounts?: { completed: number; total: number };
+  parent?: TaskParent | null;
   labels?: TaskLabel[];
   externalLinks?: TaskExternalLink[];
   customFieldValues?: TaskCustomFieldValue[];

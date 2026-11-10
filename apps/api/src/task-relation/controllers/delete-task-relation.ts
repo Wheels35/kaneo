@@ -8,6 +8,7 @@ import {
 } from "../../database/schema";
 import { publishEvent } from "../../events";
 import { projectAccessCondition } from "../../project-access/project-access-condition";
+import { refreshChildBoard } from "../refresh-child-board";
 
 async function deleteTaskRelation(
   id: string,
@@ -44,25 +45,32 @@ async function deleteTaskRelation(
     });
   }
 
-  const [task] = await db
-    .select({ projectId: taskTable.projectId })
+  const tasks = await db
+    .select({ id: taskTable.id, projectId: taskTable.projectId })
     .from(taskTable)
     .innerJoin(projectTable, eq(taskTable.projectId, projectTable.id))
     .where(
       and(
-        eq(taskTable.id, relation.sourceTaskId),
+        inArray(taskTable.id, [relation.sourceTaskId, relation.targetTaskId]),
         eq(projectTable.workspaceId, workspaceId),
       ),
-    )
-    .limit(1);
+    );
+  const projectOf = (taskId: string) =>
+    tasks.find((task) => task.id === taskId)?.projectId;
+  const sourceProjectId = projectOf(relation.sourceTaskId);
 
-  if (task) {
+  if (sourceProjectId) {
     await publishEvent("task-relation.deleted", {
       ...relation,
       taskId: relation.sourceTaskId,
-      projectId: task.projectId,
+      projectId: sourceProjectId,
       userId,
     });
+    await refreshChildBoard(
+      relation.relationType,
+      sourceProjectId,
+      projectOf(relation.targetTaskId),
+    );
   }
 
   return relation;

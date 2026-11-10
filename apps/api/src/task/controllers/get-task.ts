@@ -2,6 +2,7 @@ import { boundedTaskRead } from "../bounded-read";
 import { alias } from "drizzle-orm/pg-core";
 import { boardDescription, descriptionDeferred } from "../description-pages";
 import { getSubtaskCounts } from "../get-subtask-counts";
+import { getTaskParents } from "../get-task-parents";
 import { and, eq, sql } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
@@ -64,18 +65,22 @@ async function getTask(taskId: string, board = false, userId?: string) {
         eq(parent.projectId, result.projectId),
       ),
     );
-  const counts = await boundedTaskRead((tx) =>
-    getSubtaskCounts(
+  const { counts, parent: boardParent } = await boundedTaskRead(async (tx) => ({
+    counts: await getSubtaskCounts(
       tx,
       [taskId, ...parents.map((task) => task.id)],
       workspaceId,
       false,
       userId,
     ),
-  );
+    parent: (await getTaskParents(tx, [taskId], workspaceId, userId)).get(
+      taskId,
+    ),
+  }));
   return {
     ...result,
     subtaskCounts: counts.get(taskId) ?? { completed: 0, total: 0 },
+    parent: boardParent ?? null,
     parentSubtaskCounts: parents.map(({ id }) => ({
       taskId: id,
       ...(counts.get(id) ?? { completed: 0, total: 0 }),

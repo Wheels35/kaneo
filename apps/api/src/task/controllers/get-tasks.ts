@@ -32,6 +32,7 @@ import {
 } from "../description-pages";
 import { taskIsCompleted } from "../task-is-completed";
 import { getSubtaskCounts } from "../get-subtask-counts";
+import { getTaskParents, type TaskParent } from "../get-task-parents";
 
 export type GetTasksOptions = {
   publicOnly?: boolean;
@@ -216,6 +217,11 @@ async function getTasksPage(
     options.publicOnly ?? false,
     userId,
   );
+  // Public boards show no parent: it could sit on a private board, and the
+  // public revision hash would have to track it.
+  const parents = options.publicOnly
+    ? new Map<string, TaskParent>()
+    : await getTaskParents(db, taskIds, project.workspaceId, userId);
 
   const labelsData =
     taskIds.length > 0
@@ -422,6 +428,14 @@ async function getTasksPage(
     publicRelatedRevision = `${labels?.revision}:${links?.revision}:${children?.revision}`;
   }
 
+  const boardTask = (task: (typeof paginatedTasks)[number]) => ({
+    ...task,
+    subtaskCounts: subtaskCounts.get(task.id) ?? { completed: 0, total: 0 },
+    parent: parents.get(task.id) ?? null,
+    labels: taskLabelsMap.get(task.id) || [],
+    externalLinks: taskExternalLinksMap.get(task.id) || [],
+  });
+
   const columns = projectColumns.map((column) => ({
     id: column.slug,
     slug: column.slug,
@@ -431,31 +445,16 @@ async function getTasksPage(
     isFinal: column.isFinal,
     tasks: paginatedTasks
       .filter((task) => task.status === column.slug)
-      .map((task) => ({
-        ...task,
-        subtaskCounts: subtaskCounts.get(task.id) ?? { completed: 0, total: 0 },
-        labels: taskLabelsMap.get(task.id) || [],
-        externalLinks: taskExternalLinksMap.get(task.id) || [],
-      })),
+      .map(boardTask),
   }));
 
   const archivedTasks = paginatedTasks
     .filter((task) => task.status === "archived")
-    .map((task) => ({
-      ...task,
-      subtaskCounts: subtaskCounts.get(task.id) ?? { completed: 0, total: 0 },
-      labels: taskLabelsMap.get(task.id) || [],
-      externalLinks: taskExternalLinksMap.get(task.id) || [],
-    }));
+    .map(boardTask);
 
   const plannedTasks = paginatedTasks
     .filter((task) => task.status === "planned")
-    .map((task) => ({
-      ...task,
-      subtaskCounts: subtaskCounts.get(task.id) ?? { completed: 0, total: 0 },
-      labels: taskLabelsMap.get(task.id) || [],
-      externalLinks: taskExternalLinksMap.get(task.id) || [],
-    }));
+    .map(boardTask);
 
   return {
     data: {
