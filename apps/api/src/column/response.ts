@@ -19,6 +19,10 @@ export const columnSchema = z
       description:
         "Marks the column as a done state, which stops overdue reminders for tasks in it.",
     }),
+    blockWhileBlocked: z.boolean().openapi({
+      description:
+        "When on, a task cannot move into this column while a task blocking it is unfinished. A caller with task:override_blockers can send force=true to move it anyway.",
+    }),
     createdAt: responseTimestamp,
     updatedAt: responseTimestamp,
   })

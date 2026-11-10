@@ -1245,7 +1245,8 @@
 			"columnsTitle": "Colunas",
 			"columnsDescription": "Arraste para reordenar. Tarefas em uma coluna de concluído contam como concluídas.",
 			"automationTitle": "Automações",
-			"automationDescription": "Mova uma tarefa vinculada quando algo acontecer em um repositório conectado."
+			"automationDescription": "Mova uma tarefa vinculada quando algo acontecer em um repositório conectado.",
+			"columnsBlockDescription": "A task can't enter a \"Block while blocked\" column while a task blocking it is unfinished."
 		},
 		"projectSwitcher": {
 			"selectProject": "Selecionar projeto",
@@ -1269,7 +1270,9 @@
 			"deleteTitle": "Excluir “{{name}}”?",
 			"doneHeader": "Concluído",
 			"dragAria": "Reordenar {{name}}",
-			"reorderError": "Falha ao reordenar as colunas"
+			"reorderError": "Falha ao reordenar as colunas",
+			"blockAria": "Keep blocked tasks out of {{name}}",
+			"blockHeader": "Block while blocked"
 		},
 		"githubIntegration": {
 			"toast": {

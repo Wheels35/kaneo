@@ -1236,7 +1236,8 @@
 			"columnsTitle": "Sütunlar",
 			"columnsDescription": "Sıralamaq üçün sürükləyin. Tamamlanma sütunundakı tapşırıqlar tamamlanmış sayılır.",
 			"automationTitle": "Avtomatlaşdırmalar",
-			"automationDescription": "Qoşulmuş repozitoriyada nəsə baş verdikdə əlaqəli tapşırığı köçürün."
+			"automationDescription": "Qoşulmuş repozitoriyada nəsə baş verdikdə əlaqəli tapşırığı köçürün.",
+			"columnsBlockDescription": "A task can't enter a \"Block while blocked\" column while a task blocking it is unfinished."
 		},
 		"projectSwitcher": {
 			"selectProject": "Layihə seç",
@@ -1260,7 +1261,9 @@
 			"deleteTitle": "“{{name}}” silinsin?",
 			"doneHeader": "Tamamlanıb",
 			"dragAria": "{{name}} sütununun sırasını dəyiş",
-			"reorderError": "Sütunların sırasını dəyişmək alınmadı"
+			"reorderError": "Sütunların sırasını dəyişmək alınmadı",
+			"blockAria": "Keep blocked tasks out of {{name}}",
+			"blockHeader": "Block while blocked"
 		},
 		"githubIntegration": {
 			"toast": {

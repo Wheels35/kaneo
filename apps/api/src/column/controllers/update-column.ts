@@ -12,6 +12,7 @@ async function updateColumn(
     icon?: string | null;
     color?: string | null;
     isFinal?: boolean;
+    blockWhileBlocked?: boolean;
   },
 ) {
   const existing = await db.query.columnTable.findFirst({
@@ -29,6 +30,9 @@ async function updateColumn(
       ...(data.icon !== undefined && { icon: data.icon }),
       ...(data.color !== undefined && { color: data.color }),
       ...(data.isFinal !== undefined && { isFinal: data.isFinal }),
+      ...(data.blockWhileBlocked !== undefined && {
+        blockWhileBlocked: data.blockWhileBlocked,
+      }),
     })
     .where(eq(columnTable.id, id))
     .returning();

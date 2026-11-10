@@ -1236,7 +1236,8 @@
 			"columnsTitle": "कॉलम",
 			"columnsDescription": "क्रम बदलने के लिए खींचें। पूर्ण कॉलम के कार्य पूरे माने जाते हैं।",
 			"automationTitle": "ऑटोमेशन",
-			"automationDescription": "कनेक्ट की गई रिपॉज़िटरी में कुछ होने पर लिंक किया गया कार्य ले जाएँ।"
+			"automationDescription": "कनेक्ट की गई रिपॉज़िटरी में कुछ होने पर लिंक किया गया कार्य ले जाएँ।",
+			"columnsBlockDescription": "A task can't enter a \"Block while blocked\" column while a task blocking it is unfinished."
 		},
 		"projectSwitcher": {
 			"selectProject": "प्रोजेक्ट चुनें",
@@ -1260,7 +1261,9 @@
 			"deleteTitle": "“{{name}}” हटाएँ?",
 			"doneHeader": "पूर्ण",
 			"dragAria": "{{name}} का क्रम बदलें",
-			"reorderError": "कॉलम का क्रम बदलने में विफल"
+			"reorderError": "कॉलम का क्रम बदलने में विफल",
+			"blockAria": "Keep blocked tasks out of {{name}}",
+			"blockHeader": "Block while blocked"
 		},
 		"githubIntegration": {
 			"toast": {

@@ -1,5 +1,4 @@
 import { Trash2 } from "lucide-react";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ColumnIconPicker } from "@/components/project/columns/column-icon-picker";
 import type { ProjectColumn } from "@/components/project/columns/types";
@@ -11,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { DEFAULT_COLUMN_ICON_NAMES } from "@/constants/column-icons";
 import { cn } from "@/lib/cn";
 import { getColumnIcon } from "@/lib/column";
+import { usePendingToggle } from "./use-pending-toggle";
 
 type ColumnRowProps = {
   column: ProjectColumn;
@@ -18,6 +18,7 @@ type ColumnRowProps = {
   onRename: (name: string) => Promise<boolean>;
   onChangeIcon: (icon: string) => void;
   onToggleFinal: (isFinal: boolean) => Promise<void>;
+  onToggleBlock: (blockWhileBlocked: boolean) => Promise<void>;
   onDelete: () => void;
 };
 
@@ -36,6 +37,7 @@ export function ColumnRow({
   onRename,
   onChangeIcon,
   onToggleFinal,
+  onToggleBlock,
   onDelete,
 }: ColumnRowProps) {
   const { t } = useTranslation();
@@ -43,17 +45,14 @@ export function ColumnRow({
     column.id,
     !canEdit,
   );
-  const [pendingFinal, setPendingFinal] = useState<boolean | null>(null);
-  const isFinal = pendingFinal ?? column.isFinal;
-
-  const toggleFinal = async (checked: boolean) => {
-    setPendingFinal(checked);
-    try {
-      await onToggleFinal(checked);
-    } finally {
-      setPendingFinal(null);
-    }
-  };
+  const [isFinal, toggleFinal] = usePendingToggle(
+    column.isFinal,
+    onToggleFinal,
+  );
+  const [blocksWhileBlocked, toggleBlock] = usePendingToggle(
+    column.blockWhileBlocked,
+    onToggleBlock,
+  );
 
   return (
     <div
@@ -89,6 +88,16 @@ export function ColumnRow({
           disabled={!canEdit}
           onCheckedChange={(checked) => void toggleFinal(checked)}
           aria-label={t("settings:columnEditor.markDoneAria", {
+            name: column.name,
+          })}
+        />
+      </div>
+      <div className="flex w-24 shrink-0 justify-center">
+        <Switch
+          checked={blocksWhileBlocked}
+          disabled={!canEdit}
+          onCheckedChange={(checked) => void toggleBlock(checked)}
+          aria-label={t("settings:columnEditor.blockAria", {
             name: column.name,
           })}
         />

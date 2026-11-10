@@ -983,7 +983,8 @@
 			"columnsTitle": "Στήλες",
 			"columnsDescription": "Σύρετε για αναδιάταξη. Οι εργασίες σε στήλη ολοκλήρωσης θεωρούνται ολοκληρωμένες.",
 			"automationTitle": "Αυτοματισμοί",
-			"automationDescription": "Μετακινήστε μια συνδεδεμένη εργασία όταν συμβαίνει κάτι σε ένα συνδεδεμένο αποθετήριο."
+			"automationDescription": "Μετακινήστε μια συνδεδεμένη εργασία όταν συμβαίνει κάτι σε ένα συνδεδεμένο αποθετήριο.",
+			"columnsBlockDescription": "A task can't enter a \"Block while blocked\" column while a task blocking it is unfinished."
 		},
 		"projectSwitcher": {
 			"selectProject": "Επιλέξτε έργο",
@@ -1007,7 +1008,9 @@
 			"deleteTitle": "Διαγραφή «{{name}}»;",
 			"doneHeader": "Ολοκλήρωση",
 			"dragAria": "Αναδιάταξη {{name}}",
-			"reorderError": "Αποτυχία αναδιάταξης στηλών"
+			"reorderError": "Αποτυχία αναδιάταξης στηλών",
+			"blockAria": "Keep blocked tasks out of {{name}}",
+			"blockHeader": "Block while blocked"
 		},
 		"githubIntegration": {
 			"toast": {

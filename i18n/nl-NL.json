@@ -861,7 +861,8 @@
 			"columnsTitle": "Kolommen",
 			"columnsDescription": "Sleep om de volgorde te wijzigen. Taken in een gereed-kolom tellen als voltooid.",
 			"automationTitle": "Automatiseringen",
-			"automationDescription": "Verplaats een gekoppelde taak wanneer er iets gebeurt in een gekoppelde repository."
+			"automationDescription": "Verplaats een gekoppelde taak wanneer er iets gebeurt in een gekoppelde repository.",
+			"columnsBlockDescription": "A task can't enter a \"Block while blocked\" column while a task blocking it is unfinished."
 		},
 		"projectSwitcher": {
 			"selectProject": "Project selecteren",
@@ -885,7 +886,9 @@
 			"deleteTitle": "\"{{name}}\" verwijderen?",
 			"doneHeader": "Gereed",
 			"dragAria": "{{name}} herschikken",
-			"reorderError": "Herschikken van kolommen mislukt"
+			"reorderError": "Herschikken van kolommen mislukt",
+			"blockAria": "Keep blocked tasks out of {{name}}",
+			"blockHeader": "Block while blocked"
 		},
 		"githubIntegration": {
 			"toast": {

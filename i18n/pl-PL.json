@@ -1332,7 +1332,9 @@
 			"deleteTitle": "Usunąć „{{name}}”?",
 			"doneHeader": "Ukończone",
 			"dragAria": "Zmień kolejność: {{name}}",
-			"reorderError": "Nie udało się zmienić kolejności kolumn"
+			"reorderError": "Nie udało się zmienić kolejności kolumn",
+			"blockAria": "Keep blocked tasks out of {{name}}",
+			"blockHeader": "Block while blocked"
 		},
 		"developer": "Deweloper",
 		"developerPage": {
@@ -1824,7 +1826,8 @@
 			"columnsTitle": "Kolumny",
 			"pageTitle": "Ustawienia obiegu pracy",
 			"subtitle": "Kolumny na tablicy i to, co przenosi między nimi zadania.",
-			"title": "Obieg pracy"
+			"title": "Obieg pracy",
+			"columnsBlockDescription": "A task can't enter a \"Block while blocked\" column while a task blocking it is unfinished."
 		},
 		"repositoryBrowser": {
 			"description": "Repozytoria widoczne dla aplikacji GitHub Kaneo.",

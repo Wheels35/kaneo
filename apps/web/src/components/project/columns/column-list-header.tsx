@@ -14,6 +14,9 @@ export function ColumnListHeader() {
       <span className="w-13 shrink-0 text-center">
         {t("settings:columnEditor.doneHeader")}
       </span>
+      <span className="w-24 shrink-0 text-center leading-tight">
+        {t("settings:columnEditor.blockHeader")}
+      </span>
       <span className="w-7 shrink-0" />
     </div>
   );

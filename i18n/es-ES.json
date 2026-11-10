@@ -866,7 +866,8 @@
 			"columnsTitle": "Columnas",
 			"columnsDescription": "Arrastra para reordenar. Las tareas de una columna marcada como hecha cuentan como completadas.",
 			"automationTitle": "Automatizaciones",
-			"automationDescription": "Mueve una tarea vinculada cuando ocurre algo en un repositorio conectado."
+			"automationDescription": "Mueve una tarea vinculada cuando ocurre algo en un repositorio conectado.",
+			"columnsBlockDescription": "A task can't enter a \"Block while blocked\" column while a task blocking it is unfinished."
 		},
 		"projectSwitcher": {
 			"selectProject": "Selecciona proyecto",
@@ -890,7 +891,9 @@
 			"deleteTitle": "¿Eliminar “{{name}}”?",
 			"doneHeader": "Hecho",
 			"dragAria": "Reordenar {{name}}",
-			"reorderError": "Error al reordenar las columnas"
+			"reorderError": "Error al reordenar las columnas",
+			"blockAria": "Keep blocked tasks out of {{name}}",
+			"blockHeader": "Block while blocked"
 		},
 		"githubIntegration": {
 			"toast": {

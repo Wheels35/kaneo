@@ -156,9 +156,17 @@ const column = apiRouter()
   )
   .openapi(createColumnRoute, async (c) => {
     const { projectId } = c.req.valid("param");
-    const { name, icon, color, isFinal } = c.req.valid("json");
+    const { name, icon, color, isFinal, blockWhileBlocked } =
+      c.req.valid("json");
     return c.json(
-      await createColumn({ projectId, name, icon, color, isFinal }),
+      await createColumn({
+        projectId,
+        name,
+        icon,
+        color,
+        isFinal,
+        blockWhileBlocked,
+      }),
       200,
     );
   })

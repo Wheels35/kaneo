@@ -1146,7 +1146,8 @@
 			"columnsTitle": "Spalten",
 			"columnsDescription": "Ziehen zum Neuordnen. Aufgaben in einer Erledigt-Spalte gelten als abgeschlossen.",
 			"automationTitle": "Automatisierungen",
-			"automationDescription": "Verschiebe eine verknüpfte Aufgabe, wenn in einem verbundenen Repository etwas passiert."
+			"automationDescription": "Verschiebe eine verknüpfte Aufgabe, wenn in einem verbundenen Repository etwas passiert.",
+			"columnsBlockDescription": "A task can't enter a \"Block while blocked\" column while a task blocking it is unfinished."
 		},
 		"projectSwitcher": {
 			"selectProject": "Projekt auswählen",
@@ -1170,7 +1171,9 @@
 			"deleteTitle": "„{{name}}“ löschen?",
 			"doneHeader": "Erledigt",
 			"dragAria": "{{name}} verschieben",
-			"reorderError": "Spalten konnten nicht neu angeordnet werden"
+			"reorderError": "Spalten konnten nicht neu angeordnet werden",
+			"blockAria": "Keep blocked tasks out of {{name}}",
+			"blockHeader": "Block while blocked"
 		},
 		"githubIntegration": {
 			"toast": {

@@ -1227,7 +1227,8 @@
 			"columnsTitle": "Cột",
 			"columnsDescription": "Kéo để sắp xếp lại. Công việc trong cột hoàn thành được tính là đã hoàn thành.",
 			"automationTitle": "Tự động hóa",
-			"automationDescription": "Di chuyển công việc được liên kết khi có sự kiện xảy ra trong kho lưu trữ đã kết nối."
+			"automationDescription": "Di chuyển công việc được liên kết khi có sự kiện xảy ra trong kho lưu trữ đã kết nối.",
+			"columnsBlockDescription": "A task can't enter a \"Block while blocked\" column while a task blocking it is unfinished."
 		},
 		"projectSwitcher": {
 			"selectProject": "Chọn dự án",
@@ -1251,7 +1252,9 @@
 			"deleteTitle": "Xóa “{{name}}”?",
 			"doneHeader": "Hoàn thành",
 			"dragAria": "Sắp xếp lại {{name}}",
-			"reorderError": "Không thể sắp xếp lại các cột"
+			"reorderError": "Không thể sắp xếp lại các cột",
+			"blockAria": "Keep blocked tasks out of {{name}}",
+			"blockHeader": "Block while blocked"
 		},
 		"githubIntegration": {
 			"toast": {

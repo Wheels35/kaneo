@@ -1928,6 +1928,7 @@
 			"subtitle": "The columns on your board, and what moves tasks between them.",
 			"columnsTitle": "Columns",
 			"columnsDescription": "Drag to reorder. Tasks in a done column count as completed.",
+			"columnsBlockDescription": "A task can't enter a \"Block while blocked\" column while a task blocking it is unfinished.",
 			"automationTitle": "Automations",
 			"automationDescription": "Move a linked task when something happens in a connected repository."
 		},
@@ -1948,6 +1949,8 @@
 			"renameAria": "Rename {{name}} column",
 			"columnHeader": "Column",
 			"doneHeader": "Done",
+			"blockHeader": "Block while blocked",
+			"blockAria": "Keep blocked tasks out of {{name}}",
 			"addColumn": "Add column",
 			"dragAria": "Reorder {{name}}",
 			"deleteTitle": "Delete “{{name}}”?",

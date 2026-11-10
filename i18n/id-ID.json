@@ -975,7 +975,8 @@
 			"columnsTitle": "Kolom",
 			"columnsDescription": "Seret untuk mengubah urutan. Tugas di kolom selesai dianggap sudah selesai.",
 			"automationTitle": "Otomatisasi",
-			"automationDescription": "Pindahkan tugas tertaut saat sesuatu terjadi di repositori yang terhubung."
+			"automationDescription": "Pindahkan tugas tertaut saat sesuatu terjadi di repositori yang terhubung.",
+			"columnsBlockDescription": "A task can't enter a \"Block while blocked\" column while a task blocking it is unfinished."
 		},
 		"projectSwitcher": {
 			"selectProject": "Pilih proyek",
@@ -999,7 +1000,9 @@
 			"deleteTitle": "Hapus “{{name}}”?",
 			"doneHeader": "Selesai",
 			"dragAria": "Ubah urutan {{name}}",
-			"reorderError": "Gagal mengubah urutan kolom"
+			"reorderError": "Gagal mengubah urutan kolom",
+			"blockAria": "Keep blocked tasks out of {{name}}",
+			"blockHeader": "Block while blocked"
 		},
 		"githubIntegration": {
 			"toast": {

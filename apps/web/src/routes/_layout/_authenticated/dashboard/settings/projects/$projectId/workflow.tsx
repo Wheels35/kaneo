@@ -27,7 +27,7 @@ function RouteComponent() {
       >
         <SettingsSection
           title={t("settings:projectWorkflow.columnsTitle")}
-          description={t("settings:projectWorkflow.columnsDescription")}
+          description={`${t("settings:projectWorkflow.columnsDescription")} ${t("settings:projectWorkflow.columnsBlockDescription")}`}
         >
           <ColumnList projectId={projectId} />
         </SettingsSection>

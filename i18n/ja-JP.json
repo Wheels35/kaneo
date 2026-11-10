@@ -1227,7 +1227,8 @@
 			"columnsTitle": "カラム",
 			"columnsDescription": "ドラッグして並べ替えます。完了カラムのタスクは完了として扱われます。",
 			"automationTitle": "自動化",
-			"automationDescription": "接続済みのリポジトリでイベントが発生したときに、リンクされたタスクを移動します。"
+			"automationDescription": "接続済みのリポジトリでイベントが発生したときに、リンクされたタスクを移動します。",
+			"columnsBlockDescription": "A task can't enter a \"Block while blocked\" column while a task blocking it is unfinished."
 		},
 		"projectSwitcher": {
 			"selectProject": "プロジェクトを選択",
@@ -1251,7 +1252,9 @@
 			"deleteTitle": "「{{name}}」を削除しますか？",
 			"doneHeader": "完了",
 			"dragAria": "{{name}} を並べ替え",
-			"reorderError": "カラムの並べ替えに失敗しました"
+			"reorderError": "カラムの並べ替えに失敗しました",
+			"blockAria": "Keep blocked tasks out of {{name}}",
+			"blockHeader": "Block while blocked"
 		},
 		"githubIntegration": {
 			"toast": {

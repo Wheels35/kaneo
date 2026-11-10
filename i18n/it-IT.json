@@ -1245,7 +1245,8 @@
 			"columnsTitle": "Colonne",
 			"columnsDescription": "Trascina per riordinare. Le attività nelle colonne completate contano come concluse.",
 			"automationTitle": "Automazioni",
-			"automationDescription": "Sposta un'attività collegata quando succede qualcosa in un repository connesso."
+			"automationDescription": "Sposta un'attività collegata quando succede qualcosa in un repository connesso.",
+			"columnsBlockDescription": "A task can't enter a \"Block while blocked\" column while a task blocking it is unfinished."
 		},
 		"projectSwitcher": {
 			"selectProject": "Seleziona progetto",
@@ -1269,7 +1270,9 @@
 			"deleteTitle": "Eliminare “{{name}}”?",
 			"doneHeader": "Completata",
 			"dragAria": "Riordina {{name}}",
-			"reorderError": "Riordino delle colonne fallito"
+			"reorderError": "Riordino delle colonne fallito",
+			"blockAria": "Keep blocked tasks out of {{name}}",
+			"blockHeader": "Block while blocked"
 		},
 		"githubIntegration": {
 			"toast": {

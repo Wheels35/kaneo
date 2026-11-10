@@ -999,7 +999,8 @@
 			"columnsTitle": "Колонки",
 			"columnsDescription": "Перетягуйте, щоб змінити порядок. Завдання в колонці готовності вважаються виконаними.",
 			"automationTitle": "Автоматизації",
-			"automationDescription": "Переміщуйте пов'язане завдання, коли щось відбувається в підключеному репозиторії."
+			"automationDescription": "Переміщуйте пов'язане завдання, коли щось відбувається в підключеному репозиторії.",
+			"columnsBlockDescription": "A task can't enter a \"Block while blocked\" column while a task blocking it is unfinished."
 		},
 		"projectSwitcher": {
 			"selectProject": "Обрати проєкт",
@@ -1023,7 +1024,9 @@
 			"deleteTitle": "Видалити «{{name}}»?",
 			"doneHeader": "Готово",
 			"dragAria": "Змінити порядок: {{name}}",
-			"reorderError": "Не вдалося змінити порядок колонок"
+			"reorderError": "Не вдалося змінити порядок колонок",
+			"blockAria": "Keep blocked tasks out of {{name}}",
+			"blockHeader": "Block while blocked"
 		},
 		"githubIntegration": {
 			"toast": {

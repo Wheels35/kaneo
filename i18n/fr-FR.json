@@ -991,7 +991,8 @@
 			"columnsTitle": "Colonnes",
 			"columnsDescription": "Faites glisser pour réorganiser. Les tâches d'une colonne terminée sont comptées comme achevées.",
 			"automationTitle": "Automatisations",
-			"automationDescription": "Déplacez une tâche liée quand un événement se produit dans un dépôt connecté."
+			"automationDescription": "Déplacez une tâche liée quand un événement se produit dans un dépôt connecté.",
+			"columnsBlockDescription": "A task can't enter a \"Block while blocked\" column while a task blocking it is unfinished."
 		},
 		"projectSwitcher": {
 			"selectProject": "Sélectionner un projet",
@@ -1015,7 +1016,9 @@
 			"deleteTitle": "Supprimer “{{name}}” ?",
 			"doneHeader": "Terminé",
 			"dragAria": "Réorganiser {{name}}",
-			"reorderError": "Échec de la réorganisation des colonnes"
+			"reorderError": "Échec de la réorganisation des colonnes",
+			"blockAria": "Keep blocked tasks out of {{name}}",
+			"blockHeader": "Block while blocked"
 		},
 		"githubIntegration": {
 			"toast": {

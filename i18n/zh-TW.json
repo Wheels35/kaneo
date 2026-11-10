@@ -1226,7 +1226,8 @@
 			"columnsTitle": "欄位",
 			"columnsDescription": "拖曳以調整順序。完成欄中的任務會視為已完成。",
 			"automationTitle": "自動化",
-			"automationDescription": "已連接的 Repo 發生事件時，移動已連結的任務。"
+			"automationDescription": "已連接的 Repo 發生事件時，移動已連結的任務。",
+			"columnsBlockDescription": "A task can't enter a \"Block while blocked\" column while a task blocking it is unfinished."
 		},
 		"projectSwitcher": {
 			"selectProject": "選擇專案",
@@ -1250,7 +1251,9 @@
 			"deleteTitle": "要刪除「{{name}}」嗎？",
 			"doneHeader": "完成",
 			"dragAria": "重新排序 {{name}}",
-			"reorderError": "無法重新排序欄位"
+			"reorderError": "無法重新排序欄位",
+			"blockAria": "Keep blocked tasks out of {{name}}",
+			"blockHeader": "Block while blocked"
 		},
 		"githubIntegration": {
 			"toast": {

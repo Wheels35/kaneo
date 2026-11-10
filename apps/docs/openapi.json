@@ -1734,6 +1734,10 @@
             "type": "boolean",
             "description": "Marks the column as a done state, which stops overdue reminders for tasks in it."
           },
+          "blockWhileBlocked": {
+            "type": "boolean",
+            "description": "When on, a task cannot move into this column while a task blocking it is unfinished. A caller with task:override_blockers can send force=true to move it anyway."
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -1752,6 +1756,7 @@
           "icon",
           "color",
           "isFinal",
+          "blockWhileBlocked",
           "createdAt",
           "updatedAt"
         ]
@@ -14829,6 +14834,10 @@
                   },
                   "isFinal": {
                     "type": "boolean"
+                  },
+                  "blockWhileBlocked": {
+                    "type": "boolean",
+                    "description": "When on, a task cannot move into this column while a task blocking it is unfinished. A caller with task:override_blockers can send force=true to move it anyway."
                   }
                 },
                 "required": [
@@ -15059,6 +15068,10 @@
                   },
                   "isFinal": {
                     "type": "boolean"
+                  },
+                  "blockWhileBlocked": {
+                    "type": "boolean",
+                    "description": "When on, a task cannot move into this column while a task blocking it is unfinished. A caller with task:override_blockers can send force=true to move it anyway."
                   }
                 }
               }

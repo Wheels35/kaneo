@@ -983,7 +983,8 @@
 			"columnsTitle": "Sütunlar",
 			"columnsDescription": "Yeniden sıralamak için sürükleyin. Tamamlandı sütunundaki talepler tamamlanmış sayılır.",
 			"automationTitle": "Otomasyonlar",
-			"automationDescription": "Bağlı bir depoda bir şey olduğunda ilişkili talebi taşıyın."
+			"automationDescription": "Bağlı bir depoda bir şey olduğunda ilişkili talebi taşıyın.",
+			"columnsBlockDescription": "A task can't enter a \"Block while blocked\" column while a task blocking it is unfinished."
 		},
 		"projectSwitcher": {
 			"selectProject": "Proje seç",
@@ -1007,7 +1008,9 @@
 			"deleteTitle": "“{{name}}” silinsin mi?",
 			"doneHeader": "Tamamlandı",
 			"dragAria": "{{name}} sütununu yeniden sırala",
-			"reorderError": "Sütunlar yeniden sıralanamadı"
+			"reorderError": "Sütunlar yeniden sıralanamadı",
+			"blockAria": "Keep blocked tasks out of {{name}}",
+			"blockHeader": "Block while blocked"
 		},
 		"githubIntegration": {
 			"toast": {

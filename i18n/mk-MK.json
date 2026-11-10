@@ -983,7 +983,8 @@
 			"columnsTitle": "Колони",
 			"columnsDescription": "Повлечи за да го смениш редоследот. Задачите во завршна колона се сметаат за завршени.",
 			"automationTitle": "Автоматизации",
-			"automationDescription": "Премести поврзана задача кога ќе се случи нешто во поврзан репозиториум."
+			"automationDescription": "Премести поврзана задача кога ќе се случи нешто во поврзан репозиториум.",
+			"columnsBlockDescription": "A task can't enter a \"Block while blocked\" column while a task blocking it is unfinished."
 		},
 		"projectSwitcher": {
 			"selectProject": "Избери проект",
@@ -1007,7 +1008,9 @@
 			"deleteTitle": "Да се избрише „{{name}}“?",
 			"doneHeader": "Завршено",
 			"dragAria": "Смени редослед на {{name}}",
-			"reorderError": "Неуспешна промена на редоследот на колоните"
+			"reorderError": "Неуспешна промена на редоследот на колоните",
+			"blockAria": "Keep blocked tasks out of {{name}}",
+			"blockHeader": "Block while blocked"
 		},
 		"githubIntegration": {
 			"toast": {

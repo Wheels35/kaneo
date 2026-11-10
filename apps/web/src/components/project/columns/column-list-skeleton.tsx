@@ -14,6 +14,9 @@ export function ColumnListSkeleton() {
           <Skeleton className="h-4 w-32" />
           <span className="flex-1" />
           <Skeleton className="h-4 w-7 rounded-full" />
+          <span className="flex w-24 justify-center">
+            <Skeleton className="h-4 w-7 rounded-full" />
+          </span>
           <span className="w-7" />
         </div>
       ))}

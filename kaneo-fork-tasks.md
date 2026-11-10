@@ -34,10 +34,10 @@ Work items for [kaneo-fork-plan.md](./kaneo-fork-plan.md); design details and fi
 
 ## 4. "Block while blocked" column switch
 
-- [ ] Add `block_while_blocked` to `columnTable`; generate the migration and inspect its SQL
-- [ ] Column API: create and update bodies, response, controllers
-- [ ] Column editor: second switch, `ProjectColumn` type, fetchers, hook, i18n keys
-- [ ] `pnpm openapi:check:fix`
+- [x] Add `block_while_blocked` to `columnTable`; generate the migration and inspect its SQL
+- [x] Column API: create and update bodies, response, controllers
+- [x] Column editor: second switch, `ProjectColumn` type, fetchers, hook, i18n keys
+- [x] `pnpm openapi:check:fix`
 
 ## 5. "Subtasks block their parent" project setting
 

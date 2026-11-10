@@ -1227,7 +1227,8 @@
 			"columnsTitle": "列",
 			"columnsDescription": "拖动以重新排序。完成列中的任务会计为已完成。",
 			"automationTitle": "自动化",
-			"automationDescription": "当已连接的仓库中发生事件时，移动关联的任务。"
+			"automationDescription": "当已连接的仓库中发生事件时，移动关联的任务。",
+			"columnsBlockDescription": "A task can't enter a \"Block while blocked\" column while a task blocking it is unfinished."
 		},
 		"projectSwitcher": {
 			"selectProject": "选择项目",
@@ -1251,7 +1252,9 @@
 			"deleteTitle": "删除“{{name}}”？",
 			"doneHeader": "完成",
 			"dragAria": "重新排序 {{name}}",
-			"reorderError": "重新排序列失败"
+			"reorderError": "重新排序列失败",
+			"blockAria": "Keep blocked tasks out of {{name}}",
+			"blockHeader": "Block while blocked"
 		},
 		"githubIntegration": {
 			"toast": {

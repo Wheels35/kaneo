@@ -48,7 +48,12 @@ export function ColumnList({ projectId }: ColumnListProps) {
 
   const update = async (
     id: string,
-    data: { name?: string; icon?: string; isFinal?: boolean },
+    data: {
+      name?: string;
+      icon?: string;
+      isFinal?: boolean;
+      blockWhileBlocked?: boolean;
+    },
     fallbackKey: string,
   ) => {
     try {
@@ -114,6 +119,13 @@ export function ColumnList({ projectId }: ColumnListProps) {
                 await update(
                   column.id,
                   { isFinal },
+                  "settings:columnEditor.toastUpdateError",
+                );
+              }}
+              onToggleBlock={async (blockWhileBlocked) => {
+                await update(
+                  column.id,
+                  { blockWhileBlocked },
                   "settings:columnEditor.toastUpdateError",
                 );
               }}

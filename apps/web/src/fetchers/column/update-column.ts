@@ -9,6 +9,7 @@ async function updateColumn(
     icon?: string | null;
     color?: string | null;
     isFinal?: boolean;
+    blockWhileBlocked?: boolean;
   },
 ) {
   const response = await client.column[":id"].$put({

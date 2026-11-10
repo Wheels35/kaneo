@@ -1,0 +1,1 @@
+ALTER TABLE "column" ADD COLUMN "block_while_blocked" boolean DEFAULT false NOT NULL;

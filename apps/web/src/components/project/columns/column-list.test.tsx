@@ -43,6 +43,7 @@ vi.mock("@/hooks/queries/column/use-get-columns", () => ({
         slug: "to-do",
         icon: null,
         isFinal: false,
+        blockWhileBlocked: false,
         position: 0,
       },
       {
@@ -51,6 +52,7 @@ vi.mock("@/hooks/queries/column/use-get-columns", () => ({
         slug: "done",
         icon: null,
         isFinal: true,
+        blockWhileBlocked: true,
         position: 1,
       },
     ],
@@ -117,6 +119,24 @@ describe("ColumnList", () => {
         id: "c1",
         projectId: "p1",
         data: { isFinal: true },
+      }),
+    );
+  });
+
+  it("toggles keeping blocked tasks out of a column", async () => {
+    render(<ColumnList projectId="p1" />);
+    const [todoSwitch, doneSwitch] = screen.getAllByRole("switch", {
+      name: "settings:columnEditor.blockAria",
+    });
+    expect(todoSwitch).not.toBeChecked();
+    expect(doneSwitch).toBeChecked();
+
+    fireEvent.click(todoSwitch);
+    await waitFor(() =>
+      expect(m.updateColumn).toHaveBeenCalledWith({
+        id: "c1",
+        projectId: "p1",
+        data: { blockWhileBlocked: true },
       }),
     );
   });
