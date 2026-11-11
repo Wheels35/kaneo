@@ -2,6 +2,8 @@
 
 Work items for [kaneo-fork-plan.md](./kaneo-fork-plan.md); design details and file references live there. Each section is one commit on `feature/prevent-transitions`.
 
+Status (2026-11-10): sections 1–6b are built and tested, followed by a refactor commit (`579e7a87`) that removed duplicate code. Next is section 7. Still unchecked from earlier: the browser check in section 1.
+
 ## 1. Detail page cross-project parent fix
 
 - [x] Add `useOpenTask(workspaceId, sheetProjectId?)` in `apps/web/src/components/task/use-open-task.ts`
