@@ -28,4 +28,11 @@ describe("addTaskActions", () => {
       ]),
     ).toBeNull();
   });
+
+  it.each(["{", "null", "[]", '"text"', JSON.stringify({ task: "update" })])(
+    "skips malformed permission %s",
+    (stored) => {
+      expect(addTaskActions(stored, ["remove_blockers"])).toBeNull();
+    },
+  );
 });

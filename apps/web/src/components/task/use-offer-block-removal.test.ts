@@ -39,32 +39,23 @@ vi.mock("@/hooks/queries/project/use-get-projects", () => ({
 const child = { title: "Parser", projectId: "phase", number: 3 };
 const parent = { title: "Build phase", projectId: "plan", number: 5 };
 
-afterEach(() => {
-  vi.clearAllMocks();
-  mocks.canRemoveBlockers = true;
-});
-
 const childBlocksParent = {
   id: "block-1",
   relationType: "blocks",
   sourceTaskId: "child",
   targetTaskId: "parent",
-  sourceTask: { title: "Parser", projectId: "phase", number: 3 },
-  targetTask: { title: "Build phase", projectId: "plan", number: 5 },
+  sourceTask: child,
+  targetTask: parent,
 };
+
+afterEach(() => {
+  vi.clearAllMocks();
+  mocks.canRemoveBlockers = true;
+});
 
 describe("useOfferBlockRemoval", () => {
   it("offers to remove the block the child still has on its old parent", () => {
-    mocks.relations = [
-      {
-        id: "block-1",
-        relationType: "blocks",
-        sourceTaskId: "child",
-        targetTaskId: "parent",
-        sourceTask: child,
-        targetTask: parent,
-      },
-    ];
+    mocks.relations = [childBlocksParent];
     const { result } = renderHook(() => useOfferBlockRemoval("child", "ws"));
 
     result.current("parent");

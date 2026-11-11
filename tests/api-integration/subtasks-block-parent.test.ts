@@ -10,16 +10,9 @@ import {
   createProjectFixture,
   createWorkspaceMember,
 } from "./helpers/fixtures";
+import { addTask } from "./helpers/tasks";
 
 beforeEach(resetTestDatabase);
-
-async function addTask(projectId: string, title: string) {
-  const [task] = await db
-    .insert(schema.taskTable)
-    .values({ projectId, title, status: "to-do" })
-    .returning();
-  return task;
-}
 
 async function setup({ parentBoardOn = true, childBoardOn = false } = {}) {
   const member = await createWorkspaceMember({ role: "owner" });
@@ -36,8 +29,8 @@ async function setup({ parentBoardOn = true, childBoardOn = false } = {}) {
       .set({ subtasksBlockParent: on })
       .where(eq(schema.projectTable.id, project.project.id));
   }
-  const parent = await addTask(plan.project.id, "Phase card");
-  const child = await addTask(phase.project.id, "Phase task");
+  const parent = await addTask(plan.project.id, { title: "Phase card" });
+  const child = await addTask(phase.project.id, { title: "Phase task" });
   const link = (
     relationType: string,
     sourceTaskId: string,

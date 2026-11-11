@@ -19,35 +19,7 @@ import {
   createProjectFixture,
   createWorkspaceMember,
 } from "./helpers/fixtures";
-
-async function addTask(
-  projectId: string,
-  title = "Task",
-  number: number | null = null,
-) {
-  const [task] = await db
-    .insert(schema.taskTable)
-    .values({ projectId, title, status: "to-do", number })
-    .returning();
-  return task;
-}
-
-async function relate(
-  sourceTaskId: string,
-  targetTaskId: string,
-  createdAt?: Date,
-) {
-  const [relation] = await db
-    .insert(schema.taskRelationTable)
-    .values({
-      sourceTaskId,
-      targetTaskId,
-      relationType: "subtask",
-      ...(createdAt ? { createdAt } : {}),
-    })
-    .returning();
-  return relation;
-}
+import { addTask, relate } from "./helpers/tasks";
 
 async function parentOf(projectId: string, taskId: string, userId?: string) {
   const { data } = await getTasks(projectId, {}, userId);
@@ -68,8 +40,14 @@ async function phaseAndPlan() {
     workspaceId: member.workspace.id,
     slug: "PHASE",
   });
-  const parent = await addTask(plan.project.id, "Build phase", 5);
-  const child = await addTask(phase.project.id, "Write the parser", 2);
+  const parent = await addTask(plan.project.id, {
+    title: "Build phase",
+    number: 5,
+  });
+  const child = await addTask(phase.project.id, {
+    title: "Write the parser",
+    number: 2,
+  });
   return { member, plan, phase, parent, child };
 }
 
@@ -78,7 +56,7 @@ describe("API integration: task parent on boards", () => {
 
   it("shows a parent on another board with that board's key", async () => {
     const { member, plan, phase, parent, child } = await phaseAndPlan();
-    await relate(parent.id, child.id);
+    await relate("subtask", parent.id, child.id);
 
     mockAuthenticatedSession(member.user);
     const response = await createApp().app.request(
@@ -101,7 +79,7 @@ describe("API integration: task parent on boards", () => {
 
   it("includes the parent in a task's board view", async () => {
     const { member, parent, child } = await phaseAndPlan();
-    await relate(parent.id, child.id);
+    await relate("subtask", parent.id, child.id);
 
     mockAuthenticatedSession(member.user);
     const response = await createApp().app.request(
@@ -115,16 +93,29 @@ describe("API integration: task parent on boards", () => {
 
   it("uses the oldest link when a task has several parents", async () => {
     const { plan, phase, parent, child } = await phaseAndPlan();
-    const older = await addTask(plan.project.id, "Older parent", 1);
-    await relate(parent.id, child.id, new Date("2026-02-01T00:00:00Z"));
-    await relate(older.id, child.id, new Date("2026-01-01T00:00:00Z"));
+    const older = await addTask(plan.project.id, {
+      title: "Older parent",
+      number: 1,
+    });
+    await relate(
+      "subtask",
+      parent.id,
+      child.id,
+      new Date("2026-02-01T00:00:00Z"),
+    );
+    await relate(
+      "subtask",
+      older.id,
+      child.id,
+      new Date("2026-01-01T00:00:00Z"),
+    );
 
     expect((await parentOf(phase.project.id, child.id))?.id).toBe(older.id);
   });
 
   it("keeps a parent whose board is archived", async () => {
     const { plan, phase, parent, child } = await phaseAndPlan();
-    await relate(parent.id, child.id);
+    await relate("subtask", parent.id, child.id);
     await db
       .update(schema.projectTable)
       .set({ archivedAt: new Date() })
@@ -135,7 +126,7 @@ describe("API integration: task parent on boards", () => {
 
   it("hides a parent on a board the viewer cannot see", async () => {
     const { member, phase, parent, child } = await phaseAndPlan();
-    await relate(parent.id, child.id);
+    await relate("subtask", parent.id, child.id);
     await db.insert(schema.workspaceMemberAccessTable).values({
       workspaceId: member.workspace.id,
       userId: member.user.id,
@@ -158,16 +149,19 @@ describe("API integration: task parent on boards", () => {
     const foreign = await createProjectFixture({
       workspaceId: stranger.workspace.id,
     });
-    const foreignParent = await addTask(foreign.project.id, "Foreign", 1);
+    const foreignParent = await addTask(foreign.project.id, {
+      title: "Foreign",
+      number: 1,
+    });
     // A legacy malformed relation must not cross the workspace boundary.
-    await relate(foreignParent.id, child.id);
+    await relate("subtask", foreignParent.id, child.id);
 
     expect(await parentOf(phase.project.id, child.id)).toBeNull();
   });
 
   it("shows no parent on public boards", async () => {
     const { plan, phase, parent, child } = await phaseAndPlan();
-    await relate(parent.id, child.id);
+    await relate("subtask", parent.id, child.id);
     await db
       .update(schema.projectTable)
       .set({ isPublic: true })

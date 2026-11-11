@@ -2,6 +2,7 @@ import { eq, inArray } from "drizzle-orm";
 import { beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import db, { schema } from "../../apps/api/src/database";
 import { createApp } from "../../apps/api/src/index";
+import { AGENT_PERMISSIONS, addAgentRole } from "./helpers/agent-role";
 import { mockAuthenticatedSession } from "./helpers/auth";
 import { resetTestDatabase } from "./helpers/database";
 import { readErrorBody } from "./helpers/error-body";
@@ -10,6 +11,7 @@ import {
   createWorkspaceMember,
 } from "./helpers/fixtures";
 import { restrictToProjects } from "./helpers/project-access/restrict-to-projects";
+import { addTask as insertTask, relate } from "./helpers/tasks";
 
 // Background notifications could race the next test's TRUNCATE.
 vi.mock(
@@ -19,21 +21,12 @@ vi.mock(
 
 beforeEach(resetTestDatabase);
 
-// An agent role as the fork's docs describe it: it edits tasks, but has
-// neither Move to Done nor Override blockers.
-const AGENT = { project: ["read"], task: ["read", "create", "update"] };
-
 let taskNumber = 0;
 
 async function setup(role = "agent") {
   const member = await createWorkspaceMember({ role });
   const workspaceId = member.workspace.id;
-  if (role === "agent")
-    await db.insert(schema.workspaceRoleTable).values({
-      workspaceId,
-      role,
-      permission: JSON.stringify(AGENT),
-    });
+  if (role === "agent") await addAgentRole(workspaceId);
   const board = await createProjectFixture({ workspaceId });
   const other = await createProjectFixture({ workspaceId });
   // "In review" stands in for For validation; Done is gated too.
@@ -47,26 +40,12 @@ async function setup(role = "agent") {
       ]),
     );
 
-  const addTask = async (
+  // Numbered, so blocker keys show in error messages.
+  const addTask = (
     projectId = board.project.id,
     status = "to-do",
     title = "Card",
-  ) => {
-    taskNumber += 1;
-    const [task] = await db
-      .insert(schema.taskTable)
-      .values({ projectId, title, status, number: taskNumber, position: 0 })
-      .returning();
-    return task;
-  };
-  const relate = (
-    relationType: string,
-    sourceTaskId: string,
-    targetTaskId: string,
-  ) =>
-    db
-      .insert(schema.taskRelationTable)
-      .values({ relationType, sourceTaskId, targetTaskId });
+  ) => insertTask(projectId, { title, status, number: ++taskNumber });
 
   mockAuthenticatedSession(member.user);
   const { app } = createApp();
@@ -79,7 +58,7 @@ async function setup(role = "agent") {
   const setStatus = (taskId: string, status: string, query = "") =>
     send("PUT", `/task/status/${taskId}${query}`, { status });
 
-  return { member, board, other, addTask, relate, send, setStatus };
+  return { member, board, other, addTask, send, setStatus };
 }
 
 async function statusOf(taskId: string) {
@@ -117,8 +96,8 @@ describe("Move to Done permission", () => {
       .update(schema.workspaceRoleTable)
       .set({
         permission: JSON.stringify({
-          ...AGENT,
-          task: [...AGENT.task, "move_to_done"],
+          ...AGENT_PERMISSIONS,
+          task: [...AGENT_PERMISSIONS.task, "move_to_done"],
         }),
       })
       .where(eq(schema.workspaceRoleTable.workspaceId, member.workspace.id));
@@ -137,7 +116,7 @@ describe("Move to Done permission", () => {
   });
 
   it("leaves a full update that resends the current status alone", async () => {
-    const { board, addTask, relate, send } = await setup();
+    const { board, addTask, send } = await setup();
     const card = await addTask(board.project.id, "done");
     const blocker = await addTask();
     await relate("blocks", blocker.id, card.id);
@@ -155,7 +134,7 @@ describe("Move to Done permission", () => {
 
 describe("Block while blocked", () => {
   it("turns away a task blocked by an open task on another board", async () => {
-    const { other, addTask, relate, setStatus } = await setup("member");
+    const { other, addTask, setStatus } = await setup("member");
     const card = await addTask();
     const blocker = await addTask(
       other.project.id,
@@ -180,7 +159,7 @@ describe("Block while blocked", () => {
   });
 
   it("lets the task into a column without the switch", async () => {
-    const { addTask, relate, setStatus } = await setup("member");
+    const { addTask, setStatus } = await setup("member");
     const card = await addTask();
     await relate("blocks", (await addTask()).id, card.id);
 
@@ -188,7 +167,7 @@ describe("Block while blocked", () => {
   });
 
   it("ignores an open subtask that has no blocks link", async () => {
-    const { addTask, relate, setStatus } = await setup("member");
+    const { addTask, setStatus } = await setup("member");
     const card = await addTask();
     await relate("subtask", card.id, (await addTask()).id);
 
@@ -196,7 +175,7 @@ describe("Block while blocked", () => {
   });
 
   it("lets the task through once its blockers are done on their own board", async () => {
-    const { other, addTask, relate, setStatus } = await setup("member");
+    const { other, addTask, setStatus } = await setup("member");
     const card = await addTask();
     await relate(
       "blocks",
@@ -208,7 +187,7 @@ describe("Block while blocked", () => {
   });
 
   it("still counts a blocker on an archived board", async () => {
-    const { other, addTask, relate, setStatus } = await setup("member");
+    const { other, addTask, setStatus } = await setup("member");
     const card = await addTask();
     await relate("blocks", (await addTask(other.project.id)).id, card.id);
     await db
@@ -220,8 +199,7 @@ describe("Block while blocked", () => {
   });
 
   it("hides a blocker on a board the caller can't see", async () => {
-    const { member, board, other, addTask, relate, setStatus } =
-      await setup("member");
+    const { member, board, other, addTask, setStatus } = await setup("member");
     await restrictToProjects(member.workspace.id, member.user.id, [
       board.project.id,
     ]);
@@ -245,7 +223,7 @@ describe("Block while blocked", () => {
   });
 
   it("lets a role with Override blockers force the move", async () => {
-    const { addTask, relate, setStatus } = await setup("admin");
+    const { addTask, setStatus } = await setup("admin");
     const card = await addTask();
     await relate("blocks", (await addTask()).id, card.id);
 
@@ -262,7 +240,7 @@ describe("Block while blocked", () => {
   });
 
   it("ignores force from a role without Override blockers", async () => {
-    const { addTask, relate, setStatus } = await setup("member");
+    const { addTask, setStatus } = await setup("member");
     const card = await addTask();
     await relate("blocks", (await addTask()).id, card.id);
 
@@ -289,7 +267,7 @@ describe("Every route that moves or creates tasks", () => {
   });
 
   it("bulk status change, all or nothing", async () => {
-    const { addTask, relate, send } = await setup("member");
+    const { addTask, send } = await setup("member");
     const free = await addTask();
     const blocked = await addTask();
     await relate("blocks", (await addTask()).id, blocked.id);
@@ -304,7 +282,7 @@ describe("Every route that moves or creates tasks", () => {
   });
 
   it("bulk status change that finishes a blocker with the task it blocks", async () => {
-    const { addTask, relate, send } = await setup("member");
+    const { addTask, send } = await setup("member");
     const card = await addTask();
     const blocker = await addTask();
     await relate("blocks", blocker.id, card.id);
@@ -318,7 +296,7 @@ describe("Every route that moves or creates tasks", () => {
   });
 
   it("reorder", async () => {
-    const { board, addTask, relate, send } = await setup("member");
+    const { board, addTask, send } = await setup("member");
     const card = await addTask();
     await relate("blocks", (await addTask()).id, card.id);
 

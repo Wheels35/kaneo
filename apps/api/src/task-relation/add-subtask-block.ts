@@ -1,8 +1,6 @@
-import { and, eq, or } from "drizzle-orm";
-import type db from "../database";
+import type { DbOrTx } from "../project-access/db-or-tx";
 import { taskRelationTable } from "../database/schema";
-
-type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+import { findLinkBetween } from "./find-link-between";
 
 /**
  * Records a new subtask as blocking its parent, for boards with "Subtasks
@@ -10,30 +8,11 @@ type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
  * two tasks in either direction: an existing one is the user's own choice.
  */
 export async function addSubtaskBlock(
-  tx: Transaction,
+  tx: DbOrTx,
   parentId: string,
   childId: string,
 ) {
-  const [existing] = await tx
-    .select({ id: taskRelationTable.id })
-    .from(taskRelationTable)
-    .where(
-      and(
-        eq(taskRelationTable.relationType, "blocks"),
-        or(
-          and(
-            eq(taskRelationTable.sourceTaskId, childId),
-            eq(taskRelationTable.targetTaskId, parentId),
-          ),
-          and(
-            eq(taskRelationTable.sourceTaskId, parentId),
-            eq(taskRelationTable.targetTaskId, childId),
-          ),
-        ),
-      ),
-    )
-    .limit(1);
-  if (existing) return null;
+  if (await findLinkBetween(tx, "blocks", parentId, childId)) return null;
 
   const [block] = await tx
     .insert(taskRelationTable)

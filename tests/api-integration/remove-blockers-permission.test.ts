@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import db, { schema } from "../../apps/api/src/database";
 import { createApp } from "../../apps/api/src/index";
 import { migrateRemoveBlockersPermission } from "../../apps/api/src/migrations/remove-blockers-permission-migration";
+import { AGENT_PERMISSIONS, addAgentRole } from "./helpers/agent-role";
 import { mockAuthenticatedSession } from "./helpers/auth";
 import { resetTestDatabase } from "./helpers/database";
 import { readErrorBody } from "./helpers/error-body";
@@ -10,6 +11,7 @@ import {
   createProjectFixture,
   createWorkspaceMember,
 } from "./helpers/fixtures";
+import { addTask } from "./helpers/tasks";
 
 // Background notifications could race the next test's TRUNCATE.
 vi.mock(
@@ -19,30 +21,14 @@ vi.mock(
 
 beforeEach(resetTestDatabase);
 
-const AGENT = { project: ["read"], task: ["read", "create", "update"] };
-
 async function setup(role: string) {
   const member = await createWorkspaceMember({ role });
-  if (role === "agent")
-    await db.insert(schema.workspaceRoleTable).values({
-      workspaceId: member.workspace.id,
-      role,
-      permission: JSON.stringify(AGENT),
-    });
+  if (role === "agent") await addAgentRole(member.workspace.id);
   const { project } = await createProjectFixture({
     workspaceId: member.workspace.id,
   });
-  const [blocker, card] = await db
-    .insert(schema.taskTable)
-    .values(
-      ["Blocker", "Card"].map((title, index) => ({
-        projectId: project.id,
-        title,
-        status: "to-do",
-        number: index + 1,
-      })),
-    )
-    .returning();
+  const blocker = await addTask(project.id, { title: "Blocker" });
+  const card = await addTask(project.id, { title: "Card" });
 
   mockAuthenticatedSession(member.user);
   const { app } = createApp();
@@ -112,7 +98,7 @@ describe("Remove blockers permission migration", () => {
         [
           ["viewer", { task: ["read"] }],
           ["member", { task: ["create", "read", "update", "move_to_done"] }],
-          ["agent", AGENT],
+          ["agent", AGENT_PERMISSIONS],
         ].map(([role, permission]) => ({
           workspaceId: workspace.id,
           role: role as string,
@@ -151,11 +137,11 @@ describe("Remove blockers permission migration", () => {
     await migrateRemoveBlockersPermission();
     await db
       .update(schema.workspaceRoleTable)
-      .set({ permission: JSON.stringify(AGENT) })
+      .set({ permission: JSON.stringify(AGENT_PERMISSIONS) })
       .where(eq(schema.workspaceRoleTable.id, ids.agent));
 
     await migrateRemoveBlockersPermission();
 
-    expect(await taskActions(ids.agent)).toEqual(AGENT.task);
+    expect(await taskActions(ids.agent)).toEqual(AGENT_PERMISSIONS.task);
   });
 });

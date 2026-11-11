@@ -1,4 +1,4 @@
-import { and, eq, inArray, or } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
 import {
@@ -9,6 +9,7 @@ import {
 import { publishEvent } from "../../events";
 import { assertProjectAccess } from "../../project-access/assert-project-access";
 import { addSubtaskBlock } from "../add-subtask-block";
+import { findLinkBetween } from "../find-link-between";
 import { refreshChildBoard } from "../refresh-child-board";
 
 async function createTaskRelation({
@@ -90,27 +91,7 @@ async function createTaskRelation({
 
     await assertProjectAccess(userId, targetTask.projectId);
 
-    const existing = await tx
-      .select({ id: taskRelationTable.id })
-      .from(taskRelationTable)
-      .where(
-        and(
-          eq(taskRelationTable.relationType, relationType),
-          or(
-            and(
-              eq(taskRelationTable.sourceTaskId, sourceTaskId),
-              eq(taskRelationTable.targetTaskId, targetTaskId),
-            ),
-            and(
-              eq(taskRelationTable.sourceTaskId, targetTaskId),
-              eq(taskRelationTable.targetTaskId, sourceTaskId),
-            ),
-          ),
-        ),
-      )
-      .limit(1);
-
-    if (existing.length > 0) {
+    if (await findLinkBetween(tx, relationType, sourceTaskId, targetTaskId)) {
       throw new HTTPException(409, {
         message: "This relation already exists",
       });

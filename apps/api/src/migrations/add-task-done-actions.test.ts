@@ -28,28 +28,4 @@ describe("addTaskDoneActions", () => {
       "override_blockers",
     ]);
   });
-
-  it("leaves roles that cannot edit tasks alone", () => {
-    expect(
-      addTaskDoneActions("viewer", JSON.stringify({ task: ["read"] })),
-    ).toBeNull();
-    expect(
-      addTaskDoneActions("admin", JSON.stringify({ project: ["read"] })),
-    ).toBeNull();
-  });
-
-  it("leaves rows that already have the actions alone", () => {
-    const stored = JSON.stringify({
-      task: ["update", "move_to_done", "override_blockers"],
-    });
-
-    expect(addTaskDoneActions("admin", stored)).toBeNull();
-  });
-
-  it.each(["{", "null", "[]", '"text"', JSON.stringify({ task: "update" })])(
-    "skips malformed permission %s",
-    (stored) => {
-      expect(addTaskDoneActions("member", stored)).toBeNull();
-    },
-  );
 });
